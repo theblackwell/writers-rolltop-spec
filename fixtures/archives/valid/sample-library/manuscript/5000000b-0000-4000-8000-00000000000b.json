@@ -1,0 +1,31 @@
+{
+  "blocks" : [
+    {
+      "content" : [
+        {
+          "text" : "Years later, ",
+          "type" : "text"
+        },
+        {
+          "marks" : [
+            {
+              "id" : "70000002-0000-4000-8000-000000000002",
+              "type" : "anchor"
+            }
+          ],
+          "text" : "Mara",
+          "type" : "text"
+        },
+        {
+          "text" : " watched the archive burn from the harbour wall.",
+          "type" : "text"
+        }
+      ],
+      "id" : "6000000a-0000-4000-8000-00000000000a",
+      "type" : "paragraph"
+    }
+  ],
+  "nodeId" : "5000000b-0000-4000-8000-00000000000b",
+  "schema" : "writers-rolltop/document",
+  "version" : 1
+}

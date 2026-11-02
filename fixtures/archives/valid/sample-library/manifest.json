@@ -1,0 +1,16 @@
+{
+  "archiveId" : "969f2999-b91b-4833-bb77-9706152072e9",
+  "checksums" : {
+    "byteLength" : 3718,
+    "path" : "checksums.json",
+    "sha256" : "1677e21bf4642a1b286bd4a1e1745750fdef3983aa6c277de5fd4f998a1339c9"
+  },
+  "createdAt" : "2026-11-02T21:44:21Z",
+  "format" : "writers-rolltop-archive",
+  "formatVersion" : 1,
+  "generator" : {
+    "name" : "rolltop",
+    "version" : "0.1.0"
+  },
+  "libraryId" : "10000001-0000-4000-8000-000000000001"
+}

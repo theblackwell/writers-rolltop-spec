@@ -1,0 +1,17 @@
+{
+  "blocks" : [
+    {
+      "content" : [
+        {
+          "text" : "A light burned upstairs long after midnight.",
+          "type" : "text"
+        }
+      ],
+      "id" : "60000007-0000-4000-8000-000000000007",
+      "type" : "paragraph"
+    }
+  ],
+  "nodeId" : "50000007-0000-4000-8000-000000000007",
+  "schema" : "writers-rolltop/document",
+  "version" : 1
+}
