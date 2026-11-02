@@ -48,4 +48,4 @@ The CLI was also checked against every spec archive fixture with `rolltop valida
 
 ## Decisions still needing the owner
 
-See ADR-0001 §"Owner decisions." In short: archive extension, open-source license, revision history in archives, per-book export, minimum OS versions. Also new from the UI mockup: whether document format v1 should add **underline, alignment and lists** before it's frozen.
+See ADR-0001 §"Owner decisions." In short: archive extension, revision history in archives, per-book export, minimum OS versions. Also new from the UI mockup: whether document format v1 should add **underline, alignment and lists** before it's frozen.

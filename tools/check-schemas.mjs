@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 The Black Well Foundry
 // Dependency-free check that spec fixtures match the JSON Schemas.
 // Supports the JSON Schema subset used in schemas/: type, const, enum, pattern,
 // minLength, maxLength, minimum, maximum, minItems, required, properties,

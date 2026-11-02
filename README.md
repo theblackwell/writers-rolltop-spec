@@ -4,7 +4,7 @@ The open, implementation-independent specification for **Writers Rolltop** proje
 
 Any implementation (the native Apple apps, the self-hosted web studio, or a third-party tool) can read and write Writers Rolltop projects from this repository alone, with no vendor service involved.
 
-> Status: **M0 draft, format version 1.** See [ADR-0001](docs/adr/0001-m0-foundation.md) for the decisions and the owner approvals still open. A license has **not** been chosen yet (owner decision); please don't redistribute until one is added.
+> Status: **M0 draft, format version 1.** See [ADR-0001](docs/adr/0001-m0-foundation.md) for the decisions and the owner approvals still open.
 
 ## Contents
 
@@ -36,3 +36,7 @@ The valid sample comes from the reference implementation (`rolltop sample …` t
 ```bash
 python3 tools/make_archive_fixtures.py path/to/sample-library.rolltop
 ```
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE): documents, schemas, fixtures and tools. Anyone may implement the format, including in proprietary software. The license doesn't grant rights to the "Writers Rolltop" name or logos (see [NOTICE](NOTICE)).

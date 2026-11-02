@@ -86,9 +86,9 @@ attachments.json  attachments/<sha256>.<ext>  checksums.json
 
 | Repo | M0 contents |
 |---|---|
-| `writers-rolltop-spec` (public) | ADRs, format docs, compatibility policy, JSON Schemas, conformance fixtures (valid, invalid, malicious), dependency-free schema checker |
+| `writers-rolltop-spec` (public, Apache-2.0) | ADRs, format docs, compatibility policy, JSON Schemas, conformance fixtures (valid, invalid, malicious), dependency-free schema checker |
 | `writers-rolltop-apple` (private) | `RolltopKit` Swift package: model, store, archive, TextKit adapter, `rolltop` CLI, tests |
-| `writers-rolltop-server` (public) | Web document-adapter prototype and tests; the M3 studio and the M4 sync API come later |
+| `writers-rolltop-server` (public, AGPL-3.0-only) | Web document-adapter prototype and tests; the M3 studio and the M4 sync API come later |
 
 Spec fixtures are vendored into the other repos with a pinned spec commit. `scripts/sync-spec-fixtures.sh` refreshes them.
 
@@ -97,7 +97,7 @@ Spec fixtures are vendored into the other repos with a pinned spec commit. `scri
 | # | Question | M0 default |
 |---|---|---|
 | Q1 | Final archive extension: `.rolltop` vs a neutral `.zip` alias | `.rolltop`; readers accept any extension |
-| Q2 | Open-source license for spec and server | **None added.** Repos stay unlicensed until decided |
+| Q2 | Open-source license for spec and server | **Decided 2026-11-02 by owner:** spec Apache-2.0; server AGPL-3.0-only (copyright kept by The Black Well Foundry, contributions under a CLA so the license can be relaxed later). Native app stays proprietary |
 | Q3 | Include revision history in archives? | Current state only |
 | Q4 | Archive = whole library, or also per-book export? | Whole library only |
 | Q5 | Minimum OS versions | macOS 14 / iOS 17 for the package (GRDB 7 supports these) |

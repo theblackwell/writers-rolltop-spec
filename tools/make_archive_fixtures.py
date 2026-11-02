@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 The Black Well Foundry
 """Derive archive conformance fixtures from a valid sample archive.
 
 Usage: python3 tools/make_archive_fixtures.py <sample.rolltop>
