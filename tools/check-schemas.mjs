@@ -113,7 +113,8 @@ for (const f of readdirSync(join(docs, "normalize")).filter((f) => f.endsWith(".
 
 // Invalid documents whose violation is expressible in JSON Schema must also fail the schema.
 const schemaDetectable = ["unknown-block-type.json", "newer-version.json", "extra-field.json",
-  "heading-level-7.json", "uppercase-uuid.json", "unknown-mark.json"];
+  "heading-level-7.json", "uppercase-uuid.json", "unknown-mark.json", "quote-false.json", "align-justify.json",
+  "list-on-heading.json", "scene-break-with-content.json", "list-level-8.json"];
 for (const f of schemaDetectable)
   expect(`documents/invalid/${f}`, check(documentSchema, load(join(docs, "invalid", f)), documentSchema), false);
 

@@ -72,29 +72,29 @@
       "sha256" : "abd6aeeb5c10a496f8f3ebc5715bf74b1dcb211ca9dfa853f9eda4c88ef17304"
     },
     {
-      "byteLength" : 368,
+      "byteLength" : 2724,
       "path" : "manuscript/50000007-0000-4000-8000-000000000007.json",
-      "sha256" : "94385f779e5577cc10f9b934cce32082e5bd81e252863f0e2409f20825f347e5"
+      "sha256" : "a802020146e75834e6fb3444aad25d106f37e94c675e872871ccdc4ec48ae597"
     },
     {
       "byteLength" : 706,
       "path" : "manuscript/50000008-0000-4000-8000-000000000008.json",
-      "sha256" : "ae770eec71d3de7669286fd6cca7f9781820600560ab9309ec3ca7c992fa3871"
+      "sha256" : "26b396f294ea4ec6c1ca931fc2207a3a2344168102fed1e923e4ea97a9c50b9b"
     },
     {
       "byteLength" : 369,
       "path" : "manuscript/50000009-0000-4000-8000-000000000009.json",
-      "sha256" : "f7b39c1c070118b818b6c4e0bf1aeffdb24cf214638e027bc30e324dcbf2ba47"
+      "sha256" : "edd2da2bdb70122e89917cd4d0c27bc5b3a7b1e052bce6fe83bb8a74b8aae9be"
     },
     {
       "byteLength" : 685,
       "path" : "manuscript/5000000b-0000-4000-8000-00000000000b.json",
-      "sha256" : "1a1457ba6136cf85081cbf88e28d02f1bad30e158b85ccfc85303ef1aaaee3e4"
+      "sha256" : "8e4c70ce5689dbc2eb1fbab2ac8090e671c0a761b246d3202afc228c6ccbad85"
     },
     {
       "byteLength" : 588,
       "path" : "manuscript/5000000d-0000-4000-8000-00000000000d.json",
-      "sha256" : "059c68713a7b4b00d79e949dbc3583ede18e4915bc73199472e7bebb840fdd88"
+      "sha256" : "bacf2463f711132475846dca669d67e390972e2edc70b6005c69e1c10e321015"
     },
     {
       "byteLength" : 1247,

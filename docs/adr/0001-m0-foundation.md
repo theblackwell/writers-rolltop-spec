@@ -22,7 +22,7 @@ Every document-bearing manuscript node (scene, front matter, back matter) stores
       { "type": "hardBreak" } ] } ] }
 ```
 
-- Blocks are `paragraph` and `heading` (level 1–6). Inline nodes are `text` and `hardBreak`. Marks are `strong`, `emphasis`, `link {href}` and `anchor {id}`.
+- Blocks are `paragraph`, `heading` (level 1–6) and `sceneBreak`. Paragraphs and headings may carry `align` (left/center/right; omitted = natural) and `quote`; paragraphs may carry `list {style: bullet|ordered, level 0–7}`. Blocks are **flat**: quotations and lists are properties on consecutive blocks, so TextKit maps 1:1 and ProseMirror's nesting is rebuilt by its adapter. Inline nodes are `text` and `hardBreak`. Marks are `strong`, `emphasis`, `underline`, `link {href}` and `anchor {id}`.
 - Every block has a stable UUID. **Anchors** are stable IDs over a passage. Manuscript→bible references and future comments attach to anchors, never to character offsets.
 - The schema is **closed** within a version. A v1 reader rejects unknown node or mark types with an actionable "newer document version" error, so it never drops content it doesn't understand. New content types bump `version`.
 - Normalization (exact rules in `docs/document-format-v1.md`): line terminators in text become `hardBreak`; marks are de-duplicated and sorted; adjacent runs with equal marks merge; empty runs are dropped. **Unicode is not normalized** (no NFC/NFD rewrite). Text compares by exact scalar/code-unit sequence.
@@ -96,13 +96,13 @@ Spec fixtures are vendored into the other repos with a pinned spec commit. `scri
 
 | # | Question | M0 default |
 |---|---|---|
-| Q1 | Final archive extension: `.rolltop` vs a neutral `.zip` alias | `.rolltop`; readers accept any extension |
+| Q1 | Final archive extension | **Decided 2026-11-02 by owner:** `.rolltop` (a ZIP inside; readers accept any extension). Apple apps declare a UTI conforming to `public.zip-archive` |
 | Q2 | Open-source license for spec and server | **Decided 2026-11-02 by owner:** spec Apache-2.0; server AGPL-3.0-only (copyright kept by The Black Well Foundry, contributions under a CLA so the license can be relaxed later). Native app stays proprietary |
 | Q3 | Include revision history in archives? | Current state only |
 | Q4 | Archive = whole library, or also per-book export? | Whole library only |
 | Q5 | Minimum OS versions | macOS 14 / iOS 17 for the package (GRDB 7 supports these) |
 | Q6 | Single sync provider per project | Not relevant until M2/M4; schema doesn't preclude either |
-| Q7 | Add underline, alignment and lists to document v1 (they appear in the UI mockup)? | Not included; adding them later means a document version bump |
+| Q7 | Extra formatting in document v1 | **Decided 2026-11-02 by owner:** add underline, left/center/right alignment, block quotes, scene breaks, bulleted and numbered lists (v1 amended in place while still a draft) |
 
 ## Consequences
 

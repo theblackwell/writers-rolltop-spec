@@ -2,6 +2,8 @@
 
 Version: 1 (2026-11-02). Applies to every Writers Rolltop edition (Apple native and self-hosted).
 
+**Draft period:** until the first public release of any edition, format version 1 may change in place (no user data exists yet). From the first release on, every rule below is binding.
+
 ## Independent version numbers
 
 | Version | Where | Changes when |
