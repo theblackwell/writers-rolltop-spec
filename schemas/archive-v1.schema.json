@@ -599,6 +599,12 @@
           "name": {
             "type": "string"
           },
+          "givenName": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "familyName": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
           "aliases": {
             "type": "array",
             "items": {

@@ -82,10 +82,11 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 - `required` is an authoring hint for editors. Readers don't reject entries that are missing a required value, because authors fill in bibles gradually.
 
 ### `bible/entries.json`
-`[ { id, entryType, templateId?, name, aliases, summary?, scope, values, overrides, attachments, createdAt, updatedAt, deletedAt? } ]`
+`[ { id, entryType, templateId?, name, givenName?, familyName?, aliases, summary?, scope, values, overrides, attachments, createdAt, updatedAt, deletedAt? } ]`
 - `templateId`'s template must have the same `entryType`. `values` is an object `{ fieldId: value }`. Every key must be a field of the entry's template (no template means `values` must be empty).
 - `overrides`: `[ { bookId, values } ]`, one per book. These are book-specific state that does **not** modify shared canon. The book must be inside the entry's scope: a universe scope means the book's `universeId` equals it, and a series scope means the book's `seriesId` equals it. Book-scoped entries cannot have overrides.
 - `attachments`: array of unique SHA-256 strings.
+- `givenName` and `familyName` (non-empty strings) are a character's first and last name. They're only allowed on `character` entries. `name` stays the display name; editors build it from the two parts, but readers don't require it to match. Two characters with the same `familyName` are expected to have a relationship between them ("not related to" is a valid answer); editors ask for one, and readers never reject an archive without it.
 
 ### `bible/relationships.json`
 `{ relationshipTypes: [ { id, label, inverseLabel, orderKey, createdAt, updatedAt, deletedAt? } ], relationships: [ { id, typeId, fromEntryId, toEntryId, bookId?, note?, createdAt, updatedAt, deletedAt? } ] }`. `fromEntryId ≠ toEntryId`. `bookId`, when present, limits the relationship to that book's story state.
