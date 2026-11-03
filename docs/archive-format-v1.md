@@ -97,7 +97,7 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 `[ { id, eventId, entryId, fieldId, value, note?, createdAt, updatedAt, deletedAt? } ]`. `fieldId` must be a field of the entry's template, and `value` must match its type. A state change records that the field takes `value` from that event onward in the event's timeline.
 
 ### `references.json`
-`[ { id, nodeId, anchorId, entryId, createdAt, updatedAt, deletedAt? } ]`. The anchor must exist in the node's document. `(nodeId, anchorId, entryId)` is unique.
+`[ { id, nodeId, anchorId, entryId, createdAt, updatedAt, deletedAt? } ]`. `nodeId` must be a node with a document and `entryId` an entry. `(nodeId, anchorId, entryId)` is unique. If the anchor isn't in the node's document (the linked words were deleted), the reference is kept and reported as the warning `W_REFERENCE_ANCHOR_MISSING`, so undo or a version restore can bring the passage back. Applications only create references to anchors that exist.
 
 ### `attachments.json` and `attachments/`
 `[ { sha256, mediaType, byteLength, originalName?, extension?, createdAt } ]`. Each entry has exactly one file `attachments/<sha256>` or `attachments/<sha256>.<extension>` (`extension` matches `^[a-z0-9]{1,10}$`) whose bytes hash to `sha256` with length `byteLength`. Every referenced SHA-256 must be listed.
@@ -154,3 +154,4 @@ The limits are defaults. Implementations may make them configurable but must not
 | `W_REFERENCE_TO_DELETED` | A live record references a tombstoned record |
 | `W_CHRONOLOGY_ORDINAL` | Two live events in one timeline with the same `when.calendar` whose `orderKey` order contradicts their `when.ordinal` order |
 | `W_STATE_CONFLICT` | Two live state changes for the same event, entry and field with different values |
+| `W_REFERENCE_ANCHOR_MISSING` | A live reference's anchor is no longer in its node's document |
