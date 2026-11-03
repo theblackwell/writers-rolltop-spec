@@ -47,11 +47,12 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
   universes:  [ { id, title, summary?, orderKey, createdAt, updatedAt, deletedAt? } ],
   series:     [ { id, universeId?, title, summary?, orderKey, createdAt, updatedAt, deletedAt? } ],
   books:      [ { id, universeId?, seriesId?, title, subtitle?, authorName?, description?, language?,
-                  coverAttachment?, orderKey, createdAt, updatedAt, deletedAt? } ],
+                  coverAttachment?, targetWordCount?, targetDate?, orderKey, createdAt, updatedAt, deletedAt? } ],
   manuscriptNodes: [ { id, bookId, parentId?, kind, title, synopsis?, status?, orderKey,
                        createdAt, updatedAt, deletedAt? } ] }
 ```
 - Hierarchy is Library → Universe? → Series? → Book → Part? → Chapter → Scene. If a book has `seriesId` and that series has `universeId`, the book's `universeId` must be equal. A series with `universeId` makes the book's `universeId` required.
+- `targetWordCount` (integer ≥ 1) and `targetDate` (`YYYY-MM-DD`) are the author's optional goal for the book. Goals are informational and never restrict writing.
 - `kind` ∈ `part`, `chapter`, `scene`, `frontMatter`, `backMatter`. Parent rules: `part`, `frontMatter`, `backMatter` → no parent. `chapter` → no parent or a `part`. `scene` → a `chapter`. A parent must be in the same book.
 - Every `scene`, `frontMatter` and `backMatter` node has exactly one `manuscript/<id>.json` ([document format](document-format-v1.md)) whose `nodeId` equals the node id. Other kinds have none.
 
