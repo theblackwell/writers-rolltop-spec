@@ -62,7 +62,7 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 - Every `scene`, `frontMatter` and `backMatter` node has exactly one `manuscript/<id>.json` ([document format](document-format-v1.md)) whose `nodeId` equals the node id. Other kinds have none.
 
 ### `bible/templates.json`
-`[ { id, name, entryType, builtIn, orderKey, createdAt, updatedAt, deletedAt? } ]`. `entryType` ∈ `character`, `location`, `organization`, `object`, `event`, `plotline`, `worldRule`, `research`.
+`[ { id, name, entryType, builtIn, orderKey, createdAt, updatedAt, deletedAt? } ]`. `entryType` ∈ `character`, `location`, `organization`, `object`, `event`, `plotline`, `worldRule`, `research`, `term` (a glossary term, such as a word of an invented language).
 
 ### `bible/fields.json`
 `[ { id, templateId, key, label, fieldType, required, multiple?, options?, targetEntryTypes?, orderKey, createdAt, updatedAt, deletedAt? } ]`
@@ -81,6 +81,7 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 | `entryReference` | UUID of an entry (whose type is in `targetEntryTypes` when that's given) |
 | `entryReferences` | array of unique entry UUIDs |
 | `attachment` | SHA-256 of an attachment in `attachments.json` |
+| `table` | `{ columns, rows }`: `columns` is 1–20 strings (headings), `rows` up to 500 arrays of strings, each with exactly one string per column; every string at most 1,000 characters |
 
 - `options` (required for `selection`, forbidden otherwise): `[ { id, label } ]`.
 - `required` is an authoring hint for editors. Readers don't reject entries that are missing a required value, because authors fill in bibles gradually.
@@ -118,7 +119,7 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 - `sceneIds` are unique `scene` nodes in books within the event's scope. `participants`: `[ { entryId, role? } ]` with unique `entryId`. `entryId` optionally links a bible entry of type `event`.
 
 ### `continuity/state_changes.json`
-`[ { id, eventId, entryId, fieldId, value, note?, createdAt, updatedAt, deletedAt? } ]`. `fieldId` must be a field of the entry's template, and `value` must match its type. A state change records that the field takes `value` from that event onward in the event's timeline.
+`[ { id, eventId?, nodeId?, entryId, fieldId, value, note?, createdAt, updatedAt, deletedAt? } ]`. `fieldId` must be a field of the entry's template, and `value` must match its type. Exactly one of `eventId` and `nodeId` is present. With `eventId`, the field takes `value` from that event onward in the event's timeline. With `nodeId` (a `chapter` or `scene` in a book inside the entry's scope), it takes `value` from that point onward in that book's reading order, as in "after the third stronghold, Ben can combine words".
 
 ### `references.json`
 `[ { id, nodeId, anchorId, entryId, createdAt, updatedAt, deletedAt? } ]`. `nodeId` must be a node with a document and `entryId` an entry. `(nodeId, anchorId, entryId)` is unique. If the anchor isn't in the node's document (the linked words were deleted), the reference is kept and reported as the warning `W_REFERENCE_ANCHOR_MISSING`, so undo or a version restore can bring the passage back. Applications only create references to anchors that exist.

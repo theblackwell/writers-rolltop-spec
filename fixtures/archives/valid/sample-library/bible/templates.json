@@ -5,7 +5,7 @@
     "entryType" : "character",
     "id" : "80000001-0000-4000-8000-000000000001",
     "name" : "Character",
-    "orderKey" : "3m",
+    "orderKey" : "3a",
     "updatedAt" : "2026-11-02T12:00:00Z"
   },
   {
@@ -14,7 +14,7 @@
     "entryType" : "location",
     "id" : "80000002-0000-4000-8000-000000000002",
     "name" : "Location",
-    "orderKey" : "77",
+    "orderKey" : "6j",
     "updatedAt" : "2026-11-02T12:00:00Z"
   },
   {
@@ -23,7 +23,7 @@
     "entryType" : "organization",
     "id" : "80000003-0000-4000-8000-000000000003",
     "name" : "Organization",
-    "orderKey" : "at",
+    "orderKey" : "9t",
     "updatedAt" : "2026-11-02T12:00:00Z"
   },
   {
@@ -32,7 +32,7 @@
     "entryType" : "object",
     "id" : "80000004-0000-4000-8000-000000000004",
     "name" : "Object",
-    "orderKey" : "ee",
+    "orderKey" : "d3",
     "updatedAt" : "2026-11-02T12:00:00Z"
   },
   {
@@ -41,7 +41,7 @@
     "entryType" : "event",
     "id" : "80000005-0000-4000-8000-000000000005",
     "name" : "Event",
-    "orderKey" : "i",
+    "orderKey" : "gd",
     "updatedAt" : "2026-11-02T12:00:00Z"
   },
   {
@@ -50,7 +50,7 @@
     "entryType" : "plotline",
     "id" : "80000006-0000-4000-8000-000000000006",
     "name" : "Plotline",
-    "orderKey" : "ll",
+    "orderKey" : "jm",
     "updatedAt" : "2026-11-02T12:00:00Z"
   },
   {
@@ -59,7 +59,7 @@
     "entryType" : "worldRule",
     "id" : "80000007-0000-4000-8000-000000000007",
     "name" : "WorldRule",
-    "orderKey" : "p7",
+    "orderKey" : "mw",
     "updatedAt" : "2026-11-02T12:00:00Z"
   },
   {
@@ -68,7 +68,16 @@
     "entryType" : "research",
     "id" : "80000008-0000-4000-8000-000000000008",
     "name" : "Research",
-    "orderKey" : "ss",
+    "orderKey" : "q6",
+    "updatedAt" : "2026-11-02T12:00:00Z"
+  },
+  {
+    "builtIn" : true,
+    "createdAt" : "2026-11-02T12:00:00Z",
+    "entryType" : "term",
+    "id" : "80000009-0000-4000-8000-000000000009",
+    "name" : "Term",
+    "orderKey" : "tg",
     "updatedAt" : "2026-11-02T12:00:00Z"
   },
   {
@@ -77,7 +86,7 @@
     "entryType" : "object",
     "id" : "80000064-0000-4000-8000-000000000064",
     "name" : "Ship",
-    "orderKey" : "we",
+    "orderKey" : "wp",
     "updatedAt" : "2026-11-02T12:00:00Z"
   }
 ]

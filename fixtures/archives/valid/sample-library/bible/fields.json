@@ -295,5 +295,38 @@
     "required" : false,
     "templateId" : "80000064-0000-4000-8000-000000000064",
     "updatedAt" : "2026-11-02T12:00:00Z"
+  },
+  {
+    "createdAt" : "2026-11-02T12:00:00Z",
+    "fieldType" : "table",
+    "id" : "90000018-0000-4000-8000-000000000018",
+    "key" : "watches",
+    "label" : "Watches",
+    "orderKey" : "l2",
+    "required" : false,
+    "templateId" : "80000064-0000-4000-8000-000000000064",
+    "updatedAt" : "2026-11-02T12:00:00Z"
+  },
+  {
+    "createdAt" : "2026-11-02T12:00:00Z",
+    "fieldType" : "longText",
+    "id" : "90000019-0000-4000-8000-000000000019",
+    "key" : "meaning",
+    "label" : "Meaning",
+    "orderKey" : "ly",
+    "required" : false,
+    "templateId" : "80000009-0000-4000-8000-000000000009",
+    "updatedAt" : "2026-11-02T12:00:00Z"
+  },
+  {
+    "createdAt" : "2026-11-02T12:00:00Z",
+    "fieldType" : "shortText",
+    "id" : "9000001a-0000-4000-8000-00000000001a",
+    "key" : "pronunciation",
+    "label" : "Pronunciation",
+    "orderKey" : "mt",
+    "required" : false,
+    "templateId" : "80000009-0000-4000-8000-000000000009",
+    "updatedAt" : "2026-11-02T12:00:00Z"
   }
 ]

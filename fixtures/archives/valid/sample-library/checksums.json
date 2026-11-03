@@ -22,9 +22,9 @@
       "sha256" : "f3041abf66c8f86cb98174c81cfb53fd97a18be4fbae2673838aaa93b33b7d27"
     },
     {
-      "byteLength" : 8888,
+      "byteLength" : 9826,
       "path" : "bible/entries.json",
-      "sha256" : "62c50d3d08d4e2b0dc55429a13f54acb91961472e4c99a516b8aaa82d7adf404"
+      "sha256" : "ace42fbd58e275380f33e58f60f1f3b1deed17459879b5d319f2788e4dfd4b99"
     },
     {
       "byteLength" : 2409,
@@ -32,9 +32,9 @@
       "sha256" : "c22194fd1fc7845891f02cd9ad6967768ce43ad5221807205f74004f457aa03e"
     },
     {
-      "byteLength" : 8534,
+      "byteLength" : 9525,
       "path" : "bible/fields.json",
-      "sha256" : "c51bcc8e9275f07717a0cb6c556365050442e0463ae49daba1405227f33e995a"
+      "sha256" : "97931dd56151d2b5d393972824a78fcd5267d34a8e22b7fec7d8282a6770e568"
     },
     {
       "byteLength" : 1420,
@@ -47,9 +47,9 @@
       "sha256" : "e0a97c79e8c3676a51de17ccd35d2f25c85e27ed8a91073d70d10078e66d004e"
     },
     {
-      "byteLength" : 2186,
+      "byteLength" : 2422,
       "path" : "bible/templates.json",
-      "sha256" : "f288ce2dc2772e6b1109c0fb605e98b3cff0ea8a3b1f645d50a772ad91a8eeeb"
+      "sha256" : "0f8194af7c0453bb8b3b1c4410d594977a9a212b636ae6c4822e5da7356fa890"
     },
     {
       "byteLength" : 2585,
@@ -57,9 +57,9 @@
       "sha256" : "36f052979483cbbfed247423cfec742e50722b84820ca1989a82f8f9c1af25fb"
     },
     {
-      "byteLength" : 703,
+      "byteLength" : 1074,
       "path" : "continuity/state_changes.json",
-      "sha256" : "4b12cba164ac1b765226723c719a32eed949d486a4b3770421d00ceb37911050"
+      "sha256" : "c628b9f9680f4d6c05ba1b90b71866a16d0b1508d4199c80e1b76aa5bc1eaf6e"
     },
     {
       "byteLength" : 7438,

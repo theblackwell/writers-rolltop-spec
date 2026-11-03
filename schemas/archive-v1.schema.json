@@ -88,7 +88,8 @@
         "event",
         "plotline",
         "worldRule",
-        "research"
+        "research",
+        "term"
       ]
     },
     "manifest": {
@@ -562,7 +563,8 @@
               "fictionalDate",
               "entryReference",
               "entryReferences",
-              "attachment"
+              "attachment",
+              "table"
             ]
           },
           "required": {
@@ -869,7 +871,6 @@
         "type": "object",
         "required": [
           "id",
-          "eventId",
           "entryId",
           "fieldId",
           "value",
@@ -881,6 +882,9 @@
             "$ref": "#/$defs/uuid"
           },
           "eventId": {
+            "$ref": "#/$defs/uuid"
+          },
+          "nodeId": {
             "$ref": "#/$defs/uuid"
           },
           "entryId": {
