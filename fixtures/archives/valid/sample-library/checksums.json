@@ -97,6 +97,11 @@
       "sha256" : "bacf2463f711132475846dca669d67e390972e2edc70b6005c69e1c10e321015"
     },
     {
+      "byteLength" : 1323,
+      "path" : "notes.json",
+      "sha256" : "1078876431944e25da93686c56eee93135b4636e3fd54b4715d39b378993bc8c"
+    },
+    {
       "byteLength" : 1247,
       "path" : "references.json",
       "sha256" : "4da293e4d6ecd700795f6ce5662347cf2a91f879d9f6af2b3d2a91266cd34312"

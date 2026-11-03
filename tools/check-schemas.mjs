@@ -85,6 +85,7 @@ const archiveFiles = {
   "checksums.json": "checksums",
   "library.json": "library",
   "references.json": "references",
+  "notes.json": "notes",
   "attachments.json": "attachments",
   "bible/entries.json": "entries",
   "bible/templates.json": "templates",

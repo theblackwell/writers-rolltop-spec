@@ -928,6 +928,47 @@
           }
         }
       }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "bookId",
+          "text",
+          "orderKey",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/uuid"
+          },
+          "bookId": {
+            "$ref": "#/$defs/uuid"
+          },
+          "nodeId": {
+            "$ref": "#/$defs/uuid"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "orderKey": {
+            "$ref": "#/$defs/orderKey"
+          },
+          "createdAt": {
+            "$ref": "#/$defs/timestamp"
+          },
+          "updatedAt": {
+            "$ref": "#/$defs/timestamp"
+          },
+          "deletedAt": {
+            "$ref": "#/$defs/timestamp"
+          }
+        }
+      }
     }
   }
 }

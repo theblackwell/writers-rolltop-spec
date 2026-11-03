@@ -11,6 +11,7 @@ manifest.json
 checksums.json
 library.json
 references.json
+notes.json
 attachments.json
 manuscript/<node-uuid>.json
 bible/entries.json  bible/templates.json  bible/fields.json  bible/relationships.json
@@ -99,6 +100,9 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 
 ### `references.json`
 `[ { id, nodeId, anchorId, entryId, createdAt, updatedAt, deletedAt? } ]`. `nodeId` must be a node with a document and `entryId` an entry. `(nodeId, anchorId, entryId)` is unique. If the anchor isn't in the node's document (the linked words were deleted), the reference is kept and reported as the warning `W_REFERENCE_ANCHOR_MISSING`, so undo or a version restore can bring the passage back. Applications only create references to anchors that exist.
+
+### `notes.json`
+`[ { id, bookId, nodeId?, text, orderKey, createdAt, updatedAt, deletedAt? } ]`. Short plain-text notes the writer pins to a level of the manuscript. Without `nodeId` a note belongs to the whole book. With it, the note is pinned to that node (typically a chapter or scene), which must be in the same book. `text` is plain text (no markup) of at most 20,000 characters. `orderKey` orders the notes that share a pin.
 
 ### `attachments.json` and `attachments/`
 `[ { sha256, mediaType, byteLength, originalName?, extension?, createdAt } ]`. Each entry has exactly one file `attachments/<sha256>` or `attachments/<sha256>.<extension>` (`extension` matches `^[a-z0-9]{1,10}$`) whose bytes hash to `sha256` with length `byteLength`. Every referenced SHA-256 must be listed.
