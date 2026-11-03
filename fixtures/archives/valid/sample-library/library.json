@@ -2,6 +2,7 @@
   "books" : [
     {
       "authorName" : "A. Writer",
+      "bibleVersion" : "1.0",
       "coverAttachment" : "f3041abf66c8f86cb98174c81cfb53fd97a18be4fbae2673838aaa93b33b7d27",
       "createdAt" : "2026-11-02T12:00:00Z",
       "description" : "A missing dictionary rewrites a village.",

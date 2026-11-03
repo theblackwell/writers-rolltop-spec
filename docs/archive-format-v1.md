@@ -49,13 +49,14 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
   universes:  [ { id, title, summary?, orderKey, createdAt, updatedAt, deletedAt? } ],
   series:     [ { id, universeId?, title, summary?, orderKey, createdAt, updatedAt, deletedAt? } ],
   books:      [ { id, universeId?, seriesId?, title, subtitle?, authorName?, description?, language?,
-                  coverAttachment?, targetWordCount?, targetDate?, logline?, premise?, themes?, arcs?, principles?, orderKey, createdAt, updatedAt, deletedAt? } ],
+                  coverAttachment?, targetWordCount?, targetDate?, logline?, premise?, themes?, arcs?, principles?, bibleVersion?, orderKey, createdAt, updatedAt, deletedAt? } ],
   manuscriptNodes: [ { id, bookId, parentId?, kind, title, synopsis?, status?, povEntryId?, settingEntryId?, targetWordCount?, plan?,
                        orderKey, createdAt, updatedAt, deletedAt? } ] }
 ```
 - Hierarchy is Library → Universe? → Series? → Book → Part? → Chapter → Scene. If a book has `seriesId` and that series has `universeId`, the book's `universeId` must be equal. A series with `universeId` makes the book's `universeId` required.
 - `targetWordCount` (integer ≥ 1) and `targetDate` (`YYYY-MM-DD`) are the author's optional goal for the book. Goals are informational and never restrict writing.
 - `logline`, `premise`, `themes`, `arcs` and `principles` are the book's story overview: plain text, 1–20,000 characters each.
+- `bibleVersion` (1–32 characters, such as `1.8`) is the version label of the story bible last exported for the book. Exported copies themselves are not part of the archive.
 - On `part` and `chapter` nodes, `targetWordCount` (integer ≥ 1) is a planned length and `plan` (plain text, 1–20,000 characters) the planned beats. Both are informational.
 - `povEntryId` (the point-of-view character) and `settingEntryId` (where it takes place) are only allowed on `chapter` and `scene` nodes. They must be a `character` and a `location` entry respectively, visible from the node's book (scoped to its universe, its series or the book itself).
 - `kind` ∈ `part`, `chapter`, `scene`, `frontMatter`, `backMatter`. Parent rules: `part`, `frontMatter`, `backMatter` → no parent. `chapter` → no parent or a `part`. `scene` → a `chapter`. A parent must be in the same book.
