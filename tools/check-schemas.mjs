@@ -88,6 +88,8 @@ const archiveFiles = {
   "notes.json": "notes",
   "attachments.json": "attachments",
   "bible/entries.json": "entries",
+  "bible/facts.json": "facts",
+  "bible/questions.json": "questions",
   "bible/templates.json": "templates",
   "bible/fields.json": "fields",
   "bible/relationships.json": "relationships",

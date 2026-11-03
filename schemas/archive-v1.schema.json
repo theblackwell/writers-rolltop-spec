@@ -425,6 +425,12 @@
           "type": "string",
           "maxLength": 64
         },
+        "povEntryId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "settingEntryId": {
+          "$ref": "#/$defs/uuid"
+        },
         "orderKey": {
           "$ref": "#/$defs/orderKey"
         },
@@ -960,6 +966,154 @@
           "text": {
             "type": "string",
             "maxLength": 20000
+          },
+          "orderKey": {
+            "$ref": "#/$defs/orderKey"
+          },
+          "createdAt": {
+            "$ref": "#/$defs/timestamp"
+          },
+          "updatedAt": {
+            "$ref": "#/$defs/timestamp"
+          },
+          "deletedAt": {
+            "$ref": "#/$defs/timestamp"
+          }
+        }
+      }
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "scope",
+          "text",
+          "truth",
+          "entryIds",
+          "knowledge",
+          "orderKey",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/uuid"
+          },
+          "scope": {
+            "$ref": "#/$defs/scope"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "truth": {
+            "enum": [
+              "true",
+              "false",
+              "undecided"
+            ]
+          },
+          "nodeId": {
+            "$ref": "#/$defs/uuid"
+          },
+          "entryIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/uuid"
+            }
+          },
+          "knowledge": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "knower"
+              ],
+              "properties": {
+                "knower": {
+                  "oneOf": [
+                    {
+                      "const": "reader"
+                    },
+                    {
+                      "$ref": "#/$defs/uuid"
+                    }
+                  ]
+                },
+                "nodeId": {
+                  "$ref": "#/$defs/uuid"
+                }
+              }
+            }
+          },
+          "orderKey": {
+            "$ref": "#/$defs/orderKey"
+          },
+          "createdAt": {
+            "$ref": "#/$defs/timestamp"
+          },
+          "updatedAt": {
+            "$ref": "#/$defs/timestamp"
+          },
+          "deletedAt": {
+            "$ref": "#/$defs/timestamp"
+          }
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "scope",
+          "text",
+          "status",
+          "entryIds",
+          "orderKey",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/uuid"
+          },
+          "scope": {
+            "$ref": "#/$defs/scope"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "status": {
+            "enum": [
+              "open",
+              "decided"
+            ]
+          },
+          "decision": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "entryIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/uuid"
+            }
+          },
+          "nodeId": {
+            "$ref": "#/$defs/uuid"
           },
           "orderKey": {
             "$ref": "#/$defs/orderKey"

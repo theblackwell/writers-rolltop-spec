@@ -27,9 +27,19 @@
       "sha256" : "7ac155f6c00327c88c4c6754a62934a37722ef053d1ce2c8c5258731af67ef7c"
     },
     {
+      "byteLength" : 2389,
+      "path" : "bible/facts.json",
+      "sha256" : "3a62891bfd6c27eb6a687e7782f18a1c4f6d655d636e7c60cafdd0803dbd677f"
+    },
+    {
       "byteLength" : 8534,
       "path" : "bible/fields.json",
       "sha256" : "c51bcc8e9275f07717a0cb6c556365050442e0463ae49daba1405227f33e995a"
+    },
+    {
+      "byteLength" : 1420,
+      "path" : "bible/questions.json",
+      "sha256" : "2a5adeec896a3a6a5ef4b1a5c8f6d2f61c0423788569fd79a22e0c53f15b5735"
     },
     {
       "byteLength" : 1892,
@@ -52,9 +62,9 @@
       "sha256" : "4b12cba164ac1b765226723c719a32eed949d486a4b3770421d00ceb37911050"
     },
     {
-      "byteLength" : 6909,
+      "byteLength" : 7096,
       "path" : "library.json",
-      "sha256" : "fd9caf38f2ad8e1d353d79f01b31d6282a45dd1e0a75034cde5bae1f28575bf0"
+      "sha256" : "ae5292307ce5227ff04547306cd7c777b48c031d514e052f47a8af7abeb80e5e"
     },
     {
       "byteLength" : 477,

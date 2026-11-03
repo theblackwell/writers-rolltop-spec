@@ -15,6 +15,7 @@ notes.json
 attachments.json
 manuscript/<node-uuid>.json
 bible/entries.json  bible/templates.json  bible/fields.json  bible/relationships.json
+bible/facts.json  bible/questions.json
 continuity/events.json  continuity/state_changes.json
 attachments/<sha256>[.<ext>]
 ```
@@ -49,11 +50,12 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
   series:     [ { id, universeId?, title, summary?, orderKey, createdAt, updatedAt, deletedAt? } ],
   books:      [ { id, universeId?, seriesId?, title, subtitle?, authorName?, description?, language?,
                   coverAttachment?, targetWordCount?, targetDate?, orderKey, createdAt, updatedAt, deletedAt? } ],
-  manuscriptNodes: [ { id, bookId, parentId?, kind, title, synopsis?, status?, orderKey,
-                       createdAt, updatedAt, deletedAt? } ] }
+  manuscriptNodes: [ { id, bookId, parentId?, kind, title, synopsis?, status?, povEntryId?, settingEntryId?,
+                       orderKey, createdAt, updatedAt, deletedAt? } ] }
 ```
 - Hierarchy is Library → Universe? → Series? → Book → Part? → Chapter → Scene. If a book has `seriesId` and that series has `universeId`, the book's `universeId` must be equal. A series with `universeId` makes the book's `universeId` required.
 - `targetWordCount` (integer ≥ 1) and `targetDate` (`YYYY-MM-DD`) are the author's optional goal for the book. Goals are informational and never restrict writing.
+- `povEntryId` (the point-of-view character) and `settingEntryId` (where it takes place) are only allowed on `chapter` and `scene` nodes. They must be a `character` and a `location` entry respectively, visible from the node's book (scoped to its universe, its series or the book itself).
 - `kind` ∈ `part`, `chapter`, `scene`, `frontMatter`, `backMatter`. Parent rules: `part`, `frontMatter`, `backMatter` → no parent. `chapter` → no parent or a `part`. `scene` → a `chapter`. A parent must be in the same book.
 - Every `scene`, `frontMatter` and `backMatter` node has exactly one `manuscript/<id>.json` ([document format](document-format-v1.md)) whose `nodeId` equals the node id. Other kinds have none.
 
@@ -87,6 +89,22 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 - `overrides`: `[ { bookId, values } ]`, one per book. These are book-specific state that does **not** modify shared canon. The book must be inside the entry's scope: a universe scope means the book's `universeId` equals it, and a series scope means the book's `seriesId` equals it. Book-scoped entries cannot have overrides.
 - `attachments`: array of unique SHA-256 strings.
 - `givenName` and `familyName` (non-empty strings) are a character's first and last name. They're only allowed on `character` entries. `name` stays the display name; editors build it from the two parts, but readers don't require it to match. Two characters with the same `familyName` are expected to have a relationship between them ("not related to" is a valid answer); editors ask for one, and readers never reject an archive without it.
+
+### `bible/facts.json`
+`[ { id, scope, text, truth, nodeId?, entryIds, knowledge, orderKey, createdAt, updatedAt, deletedAt? } ]`. Established facts the story must stay consistent with, and secrets.
+- `scope` works as for entries (the world, a series or one book). `text` is plain text, 1–20,000 characters.
+- `truth` ∈ `true`, `false`, `undecided`. A `false` fact is something characters are told or believe that isn't so (a lie, a mistake); the reader can learn it like any other fact.
+- `nodeId` is the `chapter` or `scene` where the fact is established; its book must be inside the fact's scope.
+- `entryIds`: unique entries the fact is about.
+- `knowledge`: `[ { knower, nodeId? } ]`, who knows the fact and from when. `knower` is `"reader"` or the id of a `character` entry, unique within the fact. `nodeId` (a `chapter` or `scene` in a book inside the fact's scope) is where they learn it; without it, they know it from the start. A knower who isn't listed doesn't know it.
+- `orderKey` orders the facts that share a scope.
+
+### `bible/questions.json`
+`[ { id, scope, text, topic?, status, decision?, entryIds, nodeId?, orderKey, createdAt, updatedAt, deletedAt? } ]`. Open story questions and the decisions that close them.
+- `scope` as for entries. `text` is plain text, 1–20,000 characters; `decision` up to 20,000. `topic` is a short label (at most 64 characters) used to group questions, such as "The Overlord".
+- `status` ∈ `open`, `decided`. A decided question keeps its text; `decision` records the answer.
+- `entryIds`: unique entries the question is about. `nodeId` is the `chapter` or `scene` by which it should be decided ("decide when writing that chapter"); its book must be inside the question's scope.
+- `orderKey` orders the questions that share a scope.
 
 ### `bible/relationships.json`
 `{ relationshipTypes: [ { id, label, inverseLabel, orderKey, createdAt, updatedAt, deletedAt? } ], relationships: [ { id, typeId, fromEntryId, toEntryId, bookId?, note?, createdAt, updatedAt, deletedAt? } ] }`. `fromEntryId ≠ toEntryId`. `bookId`, when present, limits the relationship to that book's story state.
