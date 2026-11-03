@@ -382,6 +382,31 @@
         "targetDate": {
           "type": "string",
           "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "logline": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "premise": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "themes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "arcs": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "principles": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
         }
       }
     },
@@ -430,6 +455,16 @@
         },
         "settingEntryId": {
           "$ref": "#/$defs/uuid"
+        },
+        "targetWordCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "plan": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
         },
         "orderKey": {
           "$ref": "#/$defs/orderKey"
@@ -610,6 +645,9 @@
           },
           "familyName": {
             "$ref": "#/$defs/nonEmptyString"
+          },
+          "toBeNamed": {
+            "const": true
           },
           "aliases": {
             "type": "array",

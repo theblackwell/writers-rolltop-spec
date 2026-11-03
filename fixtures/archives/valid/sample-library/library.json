@@ -7,10 +7,13 @@
       "description" : "A missing dictionary rewrites a village.",
       "id" : "40000001-0000-4000-8000-000000000001",
       "language" : "en",
+      "logline" : "An archivist's daughter reads a letter that should not exist.",
       "orderKey" : "9",
+      "principles" : "The archive is never wholly safe or wholly lost.",
       "seriesId" : "30000001-0000-4000-8000-000000000001",
       "targetDate" : "2027-06-30",
       "targetWordCount" : 90000,
+      "themes" : "What we keep, and what keeps us.",
       "title" : "The Lost Lexicon",
       "universeId" : "20000001-0000-4000-8000-000000000001",
       "updatedAt" : "2026-11-02T12:00:00Z"
@@ -58,6 +61,8 @@
       "id" : "50000002-0000-4000-8000-000000000002",
       "kind" : "part",
       "orderKey" : "e",
+      "plan" : "Mara finds the letter.\nThe village closes ranks.",
+      "targetWordCount" : 30000,
       "title" : "Part One: Ink",
       "updatedAt" : "2026-11-02T12:00:00Z"
     },
@@ -77,6 +82,7 @@
       "kind" : "chapter",
       "orderKey" : "7",
       "parentId" : "50000002-0000-4000-8000-000000000002",
+      "targetWordCount" : 4000,
       "title" : "Chapter 1 — The Letter",
       "updatedAt" : "2026-11-02T12:00:00Z"
     },

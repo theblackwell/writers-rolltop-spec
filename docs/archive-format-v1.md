@@ -49,12 +49,14 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
   universes:  [ { id, title, summary?, orderKey, createdAt, updatedAt, deletedAt? } ],
   series:     [ { id, universeId?, title, summary?, orderKey, createdAt, updatedAt, deletedAt? } ],
   books:      [ { id, universeId?, seriesId?, title, subtitle?, authorName?, description?, language?,
-                  coverAttachment?, targetWordCount?, targetDate?, orderKey, createdAt, updatedAt, deletedAt? } ],
-  manuscriptNodes: [ { id, bookId, parentId?, kind, title, synopsis?, status?, povEntryId?, settingEntryId?,
+                  coverAttachment?, targetWordCount?, targetDate?, logline?, premise?, themes?, arcs?, principles?, orderKey, createdAt, updatedAt, deletedAt? } ],
+  manuscriptNodes: [ { id, bookId, parentId?, kind, title, synopsis?, status?, povEntryId?, settingEntryId?, targetWordCount?, plan?,
                        orderKey, createdAt, updatedAt, deletedAt? } ] }
 ```
 - Hierarchy is Library → Universe? → Series? → Book → Part? → Chapter → Scene. If a book has `seriesId` and that series has `universeId`, the book's `universeId` must be equal. A series with `universeId` makes the book's `universeId` required.
 - `targetWordCount` (integer ≥ 1) and `targetDate` (`YYYY-MM-DD`) are the author's optional goal for the book. Goals are informational and never restrict writing.
+- `logline`, `premise`, `themes`, `arcs` and `principles` are the book's story overview: plain text, 1–20,000 characters each.
+- On `part` and `chapter` nodes, `targetWordCount` (integer ≥ 1) is a planned length and `plan` (plain text, 1–20,000 characters) the planned beats. Both are informational.
 - `povEntryId` (the point-of-view character) and `settingEntryId` (where it takes place) are only allowed on `chapter` and `scene` nodes. They must be a `character` and a `location` entry respectively, visible from the node's book (scoped to its universe, its series or the book itself).
 - `kind` ∈ `part`, `chapter`, `scene`, `frontMatter`, `backMatter`. Parent rules: `part`, `frontMatter`, `backMatter` → no parent. `chapter` → no parent or a `part`. `scene` → a `chapter`. A parent must be in the same book.
 - Every `scene`, `frontMatter` and `backMatter` node has exactly one `manuscript/<id>.json` ([document format](document-format-v1.md)) whose `nodeId` equals the node id. Other kinds have none.
@@ -84,10 +86,11 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 - `required` is an authoring hint for editors. Readers don't reject entries that are missing a required value, because authors fill in bibles gradually.
 
 ### `bible/entries.json`
-`[ { id, entryType, templateId?, name, givenName?, familyName?, aliases, summary?, scope, values, overrides, attachments, createdAt, updatedAt, deletedAt? } ]`
+`[ { id, entryType, templateId?, name, givenName?, familyName?, toBeNamed?, aliases, summary?, scope, values, overrides, attachments, createdAt, updatedAt, deletedAt? } ]`
 - `templateId`'s template must have the same `entryType`. `values` is an object `{ fieldId: value }`. Every key must be a field of the entry's template (no template means `values` must be empty).
 - `overrides`: `[ { bookId, values } ]`, one per book. These are book-specific state that does **not** modify shared canon. The book must be inside the entry's scope: a universe scope means the book's `universeId` equals it, and a series scope means the book's `seriesId` equals it. Book-scoped entries cannot have overrides.
 - `attachments`: array of unique SHA-256 strings.
+- `toBeNamed: true` marks an entry whose name is a placeholder ("Conclave recruiter, to be named"). Omitted otherwise.
 - `givenName` and `familyName` (non-empty strings) are a character's first and last name. They're only allowed on `character` entries. `name` stays the display name; editors build it from the two parts, but readers don't require it to match. Two characters with the same `familyName` are expected to have a relationship between them ("not related to" is a valid answer); editors ask for one, and readers never reject an archive without it.
 
 ### `bible/facts.json`
