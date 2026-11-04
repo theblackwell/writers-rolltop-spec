@@ -66,7 +66,7 @@
     "createdAt" : "2026-11-02T12:00:00Z",
     "entryType" : "character",
     "id" : "b0000002-0000-4000-8000-000000000002",
-    "name" : "Gavin",
+    "name" : "Corin",
     "overrides" : [
       {
         "bookId" : "40000002-0000-4000-8000-000000000002",
@@ -122,7 +122,7 @@
     "createdAt" : "2026-11-02T12:00:00Z",
     "entryType" : "object",
     "id" : "b0000004-0000-4000-8000-000000000004",
-    "name" : "The Lexicon",
+    "name" : "The Ledger",
     "overrides" : [
 
     ],

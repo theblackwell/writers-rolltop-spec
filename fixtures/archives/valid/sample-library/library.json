@@ -15,7 +15,7 @@
       "targetDate" : "2027-06-30",
       "targetWordCount" : 90000,
       "themes" : "What we keep, and what keeps us.",
-      "title" : "The Lost Lexicon",
+      "title" : "The Unsent Letter",
       "universeId" : "20000001-0000-4000-8000-000000000001",
       "updatedAt" : "2026-11-02T12:00:00Z"
     },
@@ -197,7 +197,7 @@
       "createdAt" : "2026-11-02T12:00:00Z",
       "id" : "30000001-0000-4000-8000-000000000001",
       "orderKey" : "9",
-      "title" : "The Lexicon Cycle",
+      "title" : "The Lantern Cycle",
       "universeId" : "20000001-0000-4000-8000-000000000001",
       "updatedAt" : "2026-11-02T12:00:00Z"
     }

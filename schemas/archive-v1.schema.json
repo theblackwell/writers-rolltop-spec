@@ -92,6 +92,35 @@
         "term"
       ]
     },
+    "dismissedWarnings": {
+      "description": "Continuity warnings the author marked as intentional. Never empty: omit instead. Keys are unique within the record; unknown keys are kept.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "warning",
+          "dismissedAt"
+        ],
+        "properties": {
+          "warning": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400,
+            "pattern": "^[A-Za-z]+(:[0-9A-Za-z-]+)*$"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "dismissedAt": {
+            "$ref": "#/$defs/timestamp"
+          }
+        }
+      }
+    },
     "manifest": {
       "type": "object",
       "required": [
@@ -858,6 +887,9 @@
               }
             }
           },
+          "dismissedWarnings": {
+            "$ref": "#/$defs/dismissedWarnings"
+          },
           "createdAt": {
             "$ref": "#/$defs/timestamp"
           },
@@ -1097,6 +1129,9 @@
               }
             }
           },
+          "dismissedWarnings": {
+            "$ref": "#/$defs/dismissedWarnings"
+          },
           "orderKey": {
             "$ref": "#/$defs/orderKey"
           },
@@ -1161,6 +1196,9 @@
           },
           "nodeId": {
             "$ref": "#/$defs/uuid"
+          },
+          "dismissedWarnings": {
+            "$ref": "#/$defs/dismissedWarnings"
           },
           "orderKey": {
             "$ref": "#/$defs/orderKey"

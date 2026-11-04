@@ -151,7 +151,7 @@ def main(sample):
     expected["invalid/not-rolltop.rolltop"] = "ARCHIVE_NOT_ROLLTOP"
 
     bad_utf8 = dict(base)
-    bad_utf8["library.json"] = base["library.json"].replace(b"The Lost Lexicon", b"The Lost \xff\xfe Lexicon", 1)
+    bad_utf8["library.json"] = base["library.json"].replace(b"The Unsent Letter", b"The Unsent \xff\xfe Letter", 1)
     write(inv / "invalid-utf8.rolltop", recompute(bad_utf8))
     expected["invalid/invalid-utf8.rolltop"] = "ARCHIVE_INVALID_UTF8"
 
@@ -178,6 +178,12 @@ def main(sample):
     write(inv / "scene-at-root.rolltop", recompute(edit_json(base, "library.json",
           lambda lib: next(n for n in lib["manuscriptNodes"] if n["kind"] == "scene").pop("parentId"))))
     expected["invalid/scene-at-root.rolltop"] = "INTEGRITY_VIOLATION"
+
+    def duplicate_dismissal(facts):
+        fact = next(f for f in facts if "dismissedWarnings" in f)
+        fact["dismissedWarnings"].append(dict(fact["dismissedWarnings"][0]))
+    write(inv / "duplicate-dismissed-warning.rolltop", recompute(edit_json(base, "bible/facts.json", duplicate_dismissal)))
+    expected["invalid/duplicate-dismissed-warning.rolltop"] = "SCHEMA_VIOLATION"
 
     (ROOT / "expected.json").write_bytes(dumps(dict(sorted(expected.items()))))
     print(f"wrote {len(expected)} archive fixtures to {ROOT}")

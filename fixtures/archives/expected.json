@@ -1,6 +1,7 @@
 {
   "invalid/bad-checksum.rolltop": "ARCHIVE_CHECKSUM_MISMATCH",
   "invalid/broken-reference.rolltop": "REFERENCE_UNRESOLVED",
+  "invalid/duplicate-dismissed-warning.rolltop": "SCHEMA_VIOLATION",
   "invalid/invalid-document.rolltop": "DOCUMENT_INVALID",
   "invalid/invalid-json.rolltop": "ARCHIVE_INVALID_JSON",
   "invalid/invalid-utf8.rolltop": "ARCHIVE_INVALID_UTF8",

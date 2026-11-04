@@ -96,28 +96,31 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 - `givenName` and `familyName` (non-empty strings) are a character's first and last name. They're only allowed on `character` entries. `name` stays the display name; editors build it from the two parts, but readers don't require it to match. Two characters with the same `familyName` are expected to have a relationship between them ("not related to" is a valid answer); editors ask for one, and readers never reject an archive without it.
 
 ### `bible/facts.json`
-`[ { id, scope, text, truth, nodeId?, entryIds, knowledge, orderKey, createdAt, updatedAt, deletedAt? } ]`. Established facts the story must stay consistent with, and secrets.
+`[ { id, scope, text, truth, nodeId?, entryIds, knowledge, dismissedWarnings?, orderKey, createdAt, updatedAt, deletedAt? } ]`. Established facts the story must stay consistent with, and secrets.
 - `scope` works as for entries (the world, a series or one book). `text` is plain text, 1–20,000 characters.
 - `truth` ∈ `true`, `false`, `undecided`. A `false` fact is something characters are told or believe that isn't so (a lie, a mistake); the reader can learn it like any other fact.
 - `nodeId` is the `chapter` or `scene` where the fact is established; its book must be inside the fact's scope.
 - `entryIds`: unique entries the fact is about.
 - `knowledge`: `[ { knower, nodeId? } ]`, who knows the fact and from when. `knower` is `"reader"` or the id of a `character` entry, unique within the fact. `nodeId` (a `chapter` or `scene` in a book inside the fact's scope) is where they learn it; without it, they know it from the start. A knower who isn't listed doesn't know it.
+- `dismissedWarnings`: continuity warnings about this fact that the author has marked as intentional (see [Dismissed continuity warnings](#dismissed-continuity-warnings)).
 - `orderKey` orders the facts that share a scope.
 
 ### `bible/questions.json`
-`[ { id, scope, text, topic?, status, decision?, entryIds, nodeId?, orderKey, createdAt, updatedAt, deletedAt? } ]`. Open story questions and the decisions that close them.
+`[ { id, scope, text, topic?, status, decision?, entryIds, nodeId?, dismissedWarnings?, orderKey, createdAt, updatedAt, deletedAt? } ]`. Open story questions and the decisions that close them.
 - `scope` as for entries. `text` is plain text, 1–20,000 characters; `decision` up to 20,000. `topic` is a short label (at most 64 characters) used to group questions, such as "The Overlord".
 - `status` ∈ `open`, `decided`. A decided question keeps its text; `decision` records the answer.
 - `entryIds`: unique entries the question is about. `nodeId` is the `chapter` or `scene` by which it should be decided ("decide when writing that chapter"); its book must be inside the question's scope.
+- `dismissedWarnings`: continuity warnings about this question marked as intentional (see below).
 - `orderKey` orders the questions that share a scope.
 
 ### `bible/relationships.json`
 `{ relationshipTypes: [ { id, label, inverseLabel, orderKey, createdAt, updatedAt, deletedAt? } ], relationships: [ { id, typeId, fromEntryId, toEntryId, bookId?, note?, createdAt, updatedAt, deletedAt? } ] }`. `fromEntryId ≠ toEntryId`. `bookId`, when present, limits the relationship to that book's story state.
 
 ### `continuity/events.json`
-`[ { id, scope, title, summary?, when?, orderKey, entryId?, sceneIds, participants, createdAt, updatedAt, deletedAt? } ]`
+`[ { id, scope, title, summary?, when?, orderKey, entryId?, sceneIds, participants, dismissedWarnings?, createdAt, updatedAt, deletedAt? } ]`
 - A timeline is the set of events with the same scope, ordered by `orderKey` then `id`.
 - `sceneIds` are unique `scene` nodes in books within the event's scope. `participants`: `[ { entryId, role? } ]` with unique `entryId`. `entryId` optionally links a bible entry of type `event`.
+- `dismissedWarnings`: conflicting state changes at this event marked as intentional (see below).
 
 ### `continuity/state_changes.json`
 `[ { id, eventId?, nodeId?, entryId, fieldId, value, note?, createdAt, updatedAt, deletedAt? } ]`. `fieldId` must be a field of the entry's template, and `value` must match its type. Exactly one of `eventId` and `nodeId` is present. With `eventId`, the field takes `value` from that event onward in the event's timeline. With `nodeId` (a `chapter` or `scene` in a book inside the entry's scope), it takes `value` from that point onward in that book's reading order, as in "after the third stronghold, Ben can combine words".
@@ -130,6 +133,28 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 
 ### `attachments.json` and `attachments/`
 `[ { sha256, mediaType, byteLength, originalName?, extension?, createdAt } ]`. Each entry has exactly one file `attachments/<sha256>` or `attachments/<sha256>.<extension>` (`extension` matches `^[a-z0-9]{1,10}$`) whose bytes hash to `sha256` with length `byteLength`. Every referenced SHA-256 must be listed.
+
+### Dismissed continuity warnings
+Applications show advisory continuity warnings (below). An author can mark one as intentional, and it's then no longer shown. A fact, question or event records this in its optional `dismissedWarnings`: `[ { warning, note?, dismissedAt } ]`.
+- `warning` is the warning's key, below. Keys are unique within the record. `note` (1–2,000 characters) says why it's intentional. `dismissedAt` is a timestamp.
+- Each key names the places involved. If they change (a knower now learns the fact in a different chapter), the key no longer matches, and the warning shows again. Keys that no longer match anything are kept as they are; readers don't reject them, and applications may remove them.
+- Readers MUST keep keys they don't recognize, including keys of warning kinds added later. A key is at most 400 characters and matches `^[A-Za-z]+(:[0-9A-Za-z-]+)*$`.
+- An array is never empty: omit the property instead.
+
+Continuity warnings are worked out from the records, never from the prose, so every edition finds the same ones. "Before" means earlier in story order: books in the order of the story they belong to (the fact's or question's scope), then each book's reading order, where a chapter comes just before its scenes.
+
+| Warning | On | Key | Shown when |
+|---|---|---|---|
+| Learned before established | fact | `learnedBeforeEstablished:<knower>:<learnNodeId>:<factNodeId>` | a knower learns the fact in a chapter or scene before the one where it's established |
+| Established in the trash | fact | `establishedInTrash:<factNodeId>` | the fact's `nodeId` is tombstoned, or inside a tombstoned chapter, part or book |
+| Learned in the trash | fact | `learnedInTrash:<knower>:<learnNodeId>` | a knower's `nodeId` is in the trash in the same sense |
+| About a missing entry | fact | `aboutMissingEntry:<entryId>` | an `entryIds` entry is tombstoned |
+| Knower missing | fact | `knowerMissing:<knower>` | a character knower is tombstoned |
+| Undecided but known | fact | `undecidedButKnown` | `truth` is `undecided` and `knowledge` isn't empty |
+| Question overdue | question | `questionOverdue:<nodeId>` | an `open` question's `nodeId` (live) already has text: the scene's document, or any document under the chapter, has at least one word |
+| State conflict | event | `stateConflict:<entryId>:<fieldId>` | live state changes at this event set the entry's field to different values (`W_STATE_CONFLICT`) |
+
+`<knower>` is `reader` or the character's id. Only live facts, questions and events have warnings.
 
 ## Integrity rules
 
