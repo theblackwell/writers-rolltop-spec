@@ -96,20 +96,22 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 - `givenName` and `familyName` (non-empty strings) are a character's first and last name. They're only allowed on `character` entries. `name` stays the display name; editors build it from the two parts, but readers don't require it to match. Two characters with the same `familyName` are expected to have a relationship between them ("not related to" is a valid answer); editors ask for one, and readers never reject an archive without it.
 
 ### `bible/facts.json`
-`[ { id, scope, text, truth, nodeId?, entryIds, knowledge, dismissedWarnings?, orderKey, createdAt, updatedAt, deletedAt? } ]`. Established facts the story must stay consistent with, and secrets.
+`[ { id, scope, text, truth, nodeId?, entryIds, knowledge, overrides?, dismissedWarnings?, orderKey, createdAt, updatedAt, deletedAt? } ]`. Established facts the story must stay consistent with, and secrets.
 - `scope` works as for entries (the world, a series or one book). `text` is plain text, 1–20,000 characters.
 - `truth` ∈ `true`, `false`, `undecided`. A `false` fact is something characters are told or believe that isn't so (a lie, a mistake); the reader can learn it like any other fact.
 - `nodeId` is the `chapter` or `scene` where the fact is established; its book must be inside the fact's scope.
 - `entryIds`: unique entries the fact is about.
 - `knowledge`: `[ { knower, nodeId? } ]`, who knows the fact and from when. `knower` is `"reader"` or the id of a `character` entry, unique within the fact. `nodeId` (a `chapter` or `scene` in a book inside the fact's scope) is where they learn it; without it, they know it from the start. A knower who isn't listed doesn't know it.
 - `dismissedWarnings`: continuity warnings about this fact that the author has marked as intentional (see [Dismissed continuity warnings](#dismissed-continuity-warnings)).
+- `overrides`: book-specific versions of the fact (see [Book overrides on records](#book-overrides-on-records)).
 - `orderKey` orders the facts that share a scope.
 
 ### `bible/questions.json`
-`[ { id, scope, text, topic?, status, decision?, entryIds, nodeId?, dismissedWarnings?, orderKey, createdAt, updatedAt, deletedAt? } ]`. Open story questions and the decisions that close them.
+`[ { id, scope, text, topic?, status, decision?, entryIds, nodeId?, overrides?, dismissedWarnings?, orderKey, createdAt, updatedAt, deletedAt? } ]`. Open story questions and the decisions that close them.
 - `scope` as for entries. `text` is plain text, 1–20,000 characters; `decision` up to 20,000. `topic` is a short label (at most 64 characters) used to group questions, such as "The Overlord".
 - `status` ∈ `open`, `decided`. A decided question keeps its text; `decision` records the answer.
 - `entryIds`: unique entries the question is about. `nodeId` is the `chapter` or `scene` by which it should be decided ("decide when writing that chapter"); its book must be inside the question's scope.
+- `overrides`: book-specific versions of the question (see [Book overrides on records](#book-overrides-on-records)).
 - `dismissedWarnings`: continuity warnings about this question marked as intentional (see below).
 - `orderKey` orders the questions that share a scope.
 
@@ -117,9 +119,10 @@ Optional properties are **omitted** when absent; `null` is not used. Integers mu
 `{ relationshipTypes: [ { id, label, inverseLabel, orderKey, createdAt, updatedAt, deletedAt? } ], relationships: [ { id, typeId, fromEntryId, toEntryId, bookId?, note?, createdAt, updatedAt, deletedAt? } ] }`. `fromEntryId ≠ toEntryId`. `bookId`, when present, limits the relationship to that book's story state.
 
 ### `continuity/events.json`
-`[ { id, scope, title, summary?, when?, orderKey, entryId?, sceneIds, participants, dismissedWarnings?, createdAt, updatedAt, deletedAt? } ]`
+`[ { id, scope, title, summary?, when?, orderKey, entryId?, sceneIds, participants, overrides?, dismissedWarnings?, createdAt, updatedAt, deletedAt? } ]`
 - A timeline is the set of events with the same scope, ordered by `orderKey` then `id`.
 - `sceneIds` are unique `scene` nodes in books within the event's scope. `participants`: `[ { entryId, role? } ]` with unique `entryId`. `entryId` optionally links a bible entry of type `event`.
+- `overrides`: book-specific versions of the event, including its participants (see [Book overrides on records](#book-overrides-on-records)).
 - `dismissedWarnings`: conflicting state changes at this event marked as intentional (see below).
 
 ### `continuity/state_changes.json`
@@ -154,7 +157,37 @@ Continuity warnings are worked out from the records, never from the prose, so ev
 | Question overdue | question | `questionOverdue:<nodeId>` | an `open` question's `nodeId` (live) already has text: the scene's document, or any document under the chapter, has at least one word |
 | State conflict | event | `stateConflict:<entryId>:<fieldId>` | live state changes at this event set the entry's field to different values (`W_STATE_CONFLICT`) |
 
-`<knower>` is `reader` or the character's id. Only live facts, questions and events have warnings.
+`<knower>` is `reader` or the character's id. Only live facts, questions and events have warnings. For records with book overrides, the warnings are worked out per book (see below).
+
+### Book overrides on records
+A fact, question or timeline event may carry `overrides`: book-specific versions of that record that don't change shared canon. For example, a fact can be `false` in the first book and `true` after it, or an event can have other participants in one book. The property is optional.
+
+| Record | Keys an override may set |
+|---|---|
+| fact | `text`, `truth` (same rules as the top-level property) |
+| question | `text`, `status`, `decision` (same rules) |
+| event | `title`, `summary`, `when`, `participants` (same shape and rules as the top-level property) |
+
+- Omit `overrides` when there are none. The array is never empty (`minItems: 1`).
+- Each item is closed (no unknown keys) and has at least one key besides `bookId`. Otherwise `SCHEMA_VIOLATION`.
+- `bookId` names a book, which may be in the trash, as for entries. Otherwise `REFERENCE_UNRESOLVED`. Each `bookId` appears at most once in the array; a repeat is `INTEGRITY_VIOLATION`.
+- A book-scoped record cannot have overrides. Otherwise the override's book must be inside the record's scope, as for entries (see the `overrides` rule under entries). Breach: `INTEGRITY_VIOLATION`.
+- An override replaces a value. It cannot remove one, because the format has no `null`. For `summary` and `decision`, an empty string means "blank in this book".
+- Shared fields stay shared: `id`, `scope`, `orderKey`, timestamps, links (`nodeId`, `entryIds`, `knowledge`, `sceneIds`, `entryId`) and `dismissedWarnings`. `dismissedWarnings` stays shared: dismissing a warning on a shared record hides it in every book.
+
+**Effective version.** A record's version for book B is the record with each key present in B's override replacing the top-level value. Other books never see it, and a book's override does not pass to later books.
+
+**As-of order.** An entry's value as of a chapter or scene of book B is worked out in this order, and the last value found wins:
+1. shared canon: the entry's top-level value;
+2. changes placed in earlier books of the entry's scope, in library order (the live books in the scope, by `orderKey`), each applied in full;
+3. this book's entry override, if it has one;
+4. this book's own changes up to that chapter or scene, in reading order.
+
+Records have no state changes, so a record's As-of view in book B is simply its effective version for B. Record overrides follow the same idea: canon, then this book's override, never inherited by later books.
+
+**Warnings per book.** Continuity warnings and As-of views are worked out per book from the effective record. For book B, each record in B's scope is read as B sees it (its effective version, including its `when` for chronology), and the warnings above are computed from those versions and from B's reading order. A warning appears in each book where its condition holds.
+
+**Compatibility.** These are optional properties on top-level records, so `formatVersion` stays 1 and no version bump is made: additive optional fields need none ([compatibility policy](compatibility-policy.md), rule 2), and the format is still in its draft period. Readers that do not know the property preserve it on round trip.
 
 ## Integrity rules
 

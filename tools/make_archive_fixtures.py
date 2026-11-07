@@ -8,7 +8,8 @@ Usage: python3 tools/make_archive_fixtures.py <sample.rolltop>
 Writes fixtures/archives/{valid,invalid,malicious}/ and expected.json. The
 sample archive itself is produced by the reference implementation:
 `rolltop sample X.rolltoplib && rolltop export X.rolltoplib sample-library.rolltop`.
-Standard library only.
+The sample is read into memory first, so it may be the checked-in copy under
+fixtures/archives/valid (that folder is rebuilt from it). Standard library only.
 """
 import hashlib
 import io
@@ -70,16 +71,47 @@ def edit_json(files, path, fn):
     return files
 
 
+# Ids from the sample library. SERIES_FACT and SERIES_QUESTION are series-scoped (series
+# 30000001 holds FIRST_BOOK and SALT_BOOK; FLEET_BOOK is outside it). UNIVERSE_EVENT is
+# universe-scoped (universe 20000001 holds FIRST_BOOK and SALT_BOOK). BOOK_EVENT is book-scoped.
+FIRST_BOOK = "40000001-0000-4000-8000-000000000001"
+SALT_BOOK = "40000002-0000-4000-8000-000000000002"
+FLEET_BOOK = "40000003-0000-4000-8000-000000000003"
+SERIES_FACT = "f0000202-0000-4000-8000-000000000202"
+SERIES_QUESTION = "f0000301-0000-4000-8000-000000000301"
+UNIVERSE_EVENT = "d0000001-0000-4000-8000-000000000001"
+BOOK_EVENT = "d0000002-0000-4000-8000-000000000002"
+ARCHIVISTS = "b0000005-0000-4000-8000-000000000005"
+
+
+def set_record_field(items, record_id, key, value):
+    next(item for item in items if item["id"] == record_id)[key] = value
+
+
+def record_overrides(base):
+    files = edit_json(base, "bible/facts.json", lambda fs: set_record_field(fs, SERIES_FACT, "overrides", [
+        {"bookId": SALT_BOOK, "text": "The lamp in the attic was never lit.", "truth": "false"}]))
+    files = edit_json(files, "bible/questions.json", lambda qs: set_record_field(qs, SERIES_QUESTION, "overrides", [
+        {"bookId": SALT_BOOK, "status": "decided", "decision": ""}]))
+    files = edit_json(files, "continuity/events.json", lambda es: set_record_field(es, UNIVERSE_EVENT, "overrides", [
+        {"bookId": FIRST_BOOK, "title": "The founding, as told in the first book", "summary": "",
+         "when": {"label": "Year 1", "calendar": "Lantern Reckoning", "ordinal": 1},
+         "participants": [{"entryId": ARCHIVISTS, "role": "keepers"}]}]))
+    return recompute(files)
+
+
 def main(sample):
-    base = load(sample)
+    raw = Path(sample).read_bytes()
+    base = load(io.BytesIO(raw))
     if ROOT.exists():
         shutil.rmtree(ROOT)
     expected = {}
 
     # valid/
     valid = ROOT / "valid"
-    shutil.copy(sample, valid.mkdir(parents=True) or valid / "sample-library.rolltop")
-    with zipfile.ZipFile(sample) as z:
+    valid.mkdir(parents=True)
+    (valid / "sample-library.rolltop").write_bytes(raw)
+    with zipfile.ZipFile(io.BytesIO(raw)) as z:
         z.extractall(valid / "sample-library")
     expected["valid/sample-library.rolltop"] = "VALID"
 
@@ -89,6 +121,16 @@ def main(sample):
     future = edit_json(future, "manifest.json", lambda m: m.__setitem__("x-futureManifestProperty", True))
     write(valid / "unknown-optional-fields.rolltop", future)
     expected["valid/unknown-optional-fields.rolltop"] = "VALID"
+
+    # Book overrides on shared facts, questions and events (optional `overrides`).
+    # The expanded copy lets check-schemas.mjs validate every file of the archive.
+    overridden = record_overrides(base)
+    write(valid / "record-overrides.rolltop", overridden)
+    expected["valid/record-overrides.rolltop"] = "VALID"
+    for name, data in overridden.items():
+        target = valid / "record-overrides" / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
 
     # malicious/
     mal = ROOT / "malicious"
@@ -174,6 +216,18 @@ def main(sample):
     write(inv / "override-outside-scope.rolltop", recompute(edit_json(base, "bible/entries.json",
           lambda es: es[universe_entry]["overrides"].append({"bookId": standalone_book, "values": {}}))))
     expected["invalid/override-outside-scope.rolltop"] = "INTEGRITY_VIOLATION"
+
+    write(inv / "record-override-outside-scope.rolltop", recompute(edit_json(base, "bible/facts.json",
+          lambda fs: set_record_field(fs, SERIES_FACT, "overrides", [{"bookId": FLEET_BOOK, "truth": "true"}]))))
+    expected["invalid/record-override-outside-scope.rolltop"] = "INTEGRITY_VIOLATION"
+
+    write(inv / "record-override-book-scoped.rolltop", recompute(edit_json(base, "continuity/events.json",
+          lambda es: set_record_field(es, BOOK_EVENT, "overrides", [{"bookId": FIRST_BOOK, "title": "Changed"}]))))
+    expected["invalid/record-override-book-scoped.rolltop"] = "INTEGRITY_VIOLATION"
+
+    write(inv / "record-override-unknown-key.rolltop", recompute(edit_json(base, "bible/facts.json",
+          lambda fs: set_record_field(fs, SERIES_FACT, "overrides", [{"bookId": SALT_BOOK, "text": "Changed", "colour": "red"}]))))
+    expected["invalid/record-override-unknown-key.rolltop"] = "SCHEMA_VIOLATION"
 
     write(inv / "scene-at-root.rolltop", recompute(edit_json(base, "library.json",
           lambda lib: next(n for n in lib["manuscriptNodes"] if n["kind"] == "scene").pop("parentId"))))

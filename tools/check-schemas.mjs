@@ -3,7 +3,7 @@
 // Copyright 2026 The Black Well Foundry
 // Dependency-free check that spec fixtures match the JSON Schemas.
 // Supports the JSON Schema subset used in schemas/: type, const, enum, pattern,
-// minLength, maxLength, minimum, maximum, minItems, required, properties,
+// minLength, maxLength, minimum, maximum, minItems, minProperties, required, properties,
 // additionalProperties, items, oneOf and local $ref ("#/$defs/...").
 // Usage: node tools/check-schemas.mjs
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
@@ -55,6 +55,7 @@ function validate(schema, value, rootSchema, path, errors) {
   }
   if (t === "object") {
     for (const key of schema.required ?? []) if (!(key in value)) errors.push(`${path}: missing ${key}`);
+    if (schema.minProperties !== undefined && Object.keys(value).length < schema.minProperties) errors.push(`${path}: fewer than ${schema.minProperties} properties`);
     const props = schema.properties ?? {};
     for (const [key, v] of Object.entries(value)) {
       if (key in props) validate(props[key], v, rootSchema, `${path}.${key}`, errors);
