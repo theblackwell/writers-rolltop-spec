@@ -11,7 +11,7 @@ Version: 1 (2026-11-02). Applies to every Writers Rolltop edition (Apple native 
 | Archive `formatVersion` | `manifest.json` | the archive layout or record semantics change incompatibly |
 | Document `version` | each `manuscript/*.json` | new block, inline or mark types, or changed meaning |
 | Database schema | each app's local store (`grdb_migrations` on Apple) | any local storage change; never visible in archives |
-| Sync protocol version | later (M4) | wire changes |
+| Sync protocol version | later (M1 in the renumbered plan, 2026-11-08) | wire changes |
 
 ## Rules
 

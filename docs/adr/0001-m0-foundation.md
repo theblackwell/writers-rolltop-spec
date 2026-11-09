@@ -88,7 +88,7 @@ attachments.json  attachments/<sha256>.<ext>  checksums.json
 |---|---|
 | `writers-rolltop-spec` (public, Apache-2.0) | ADRs, format docs, compatibility policy, JSON Schemas, conformance fixtures (valid, invalid, malicious), dependency-free schema checker |
 | `writers-rolltop-apple` (private) | `RolltopKit` Swift package: model, store, archive, TextKit adapter, `rolltop` CLI, tests |
-| `writers-rolltop-server` (public, AGPL-3.0-only) | Web document-adapter prototype and tests; the M3 studio and the M4 sync API come later |
+| `writers-rolltop-server` (public, AGPL-3.0-only) | Web document-adapter prototype and tests; the M1 self-hosted studio and sync API come later (milestone numbers follow the renumbered plan of 2026-11-08) |
 
 Spec fixtures are vendored into the other repos with a pinned spec commit. `scripts/sync-spec-fixtures.sh` refreshes them.
 
@@ -101,7 +101,7 @@ Spec fixtures are vendored into the other repos with a pinned spec commit. `scri
 | Q3 | Include revision history in archives? | Current state only |
 | Q4 | Archive = whole library, or also per-book export? | Whole library only |
 | Q5 | Minimum OS versions | macOS 14 / iOS 17 for the package (GRDB 7 supports these) |
-| Q6 | Single sync provider per project | Not relevant until M2/M4; schema doesn't preclude either |
+| Q6 | Single sync provider per Library (amended 2026-11-08 from "per project": a Library's Books share canon in one database) | Not relevant until M1/M4 (renumbered plan); schema doesn't preclude either |
 | Q7 | Extra formatting in document v1 | **Decided 2026-11-02 by owner:** add underline, left/center/right alignment, block quotes, scene breaks, bulleted and numbered lists (v1 amended in place while still a draft) |
 
 ## Consequences
