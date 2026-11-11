@@ -74,7 +74,7 @@
               "value": {
                 "id": "22222222-2222-4222-8222-222222222222",
                 "bookId": "44444444-4444-4444-8444-444444444444",
-                "kind": "chapter",
+                "kind": "frontMatter",
                 "title": "Chapter",
                 "orderKey": "m",
                 "createdAt": "2026-11-11T12:00:00Z",
