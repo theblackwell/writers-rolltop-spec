@@ -3,12 +3,13 @@
 // Copyright 2026 The Black Well Foundry
 // Dependency-free check that spec fixtures match the JSON Schemas.
 // Supports the JSON Schema subset used in schemas/: type, const, enum, pattern,
-// minLength, maxLength, minimum, maximum, minItems, minProperties, required, properties,
+// minLength, maxLength, minimum, maximum, minItems, maxItems, minProperties, required, properties,
 // additionalProperties, items, oneOf and local $ref ("#/$defs/...").
 // Usage: node tools/check-schemas.mjs
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createLibrary, handle } from "./sync-model.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const load = (p) => JSON.parse(readFileSync(p, "utf8"));
@@ -51,6 +52,7 @@ function validate(schema, value, rootSchema, path, errors) {
   }
   if (t === "array") {
     if (schema.minItems !== undefined && value.length < schema.minItems) errors.push(`${path}: fewer than ${schema.minItems} items`);
+    if (schema.maxItems !== undefined && value.length > schema.maxItems) errors.push(`${path}: more than ${schema.maxItems} items`);
     if (schema.items) value.forEach((item, i) => validate(schema.items, item, rootSchema, `${path}[${i}]`, errors));
   }
   if (t === "object") {
@@ -134,6 +136,98 @@ if (existsSync(archivesDir)) {
     for (const f of readdirSync(manuscript))
       expect(`archives/valid/${name}/manuscript/${f}`, check(documentSchema, load(join(manuscript, f)), documentSchema), true);
   }
+}
+
+// Sync protocol v1: every fixture request validates against the schema, and the reference model
+// must reproduce every expected response (docs/sync-protocol-v1.md).
+const syncSchema = load(join(root, "schemas/sync-v1.schema.json"));
+const syncDir = join(root, "fixtures/sync");
+
+// Expected-body matcher. "@name" (name: letter then letters or digits) captures on first use and must repeat.
+// Captures are for conflict ids only: the first-use value must be a string of 1 to 64 characters (the conflictId
+// schema type); anything else fails. Any other expected string starting with "@" is a fixture error: "@" is reserved.
+// "*" matches any string; every other expected value must match exactly.
+const CAPTURE = /^@[A-Za-z][A-Za-z0-9]*$/;
+function matchBody(expected, actual, captures, path, errors) {
+  if (typeof expected === "string" && expected.startsWith("@")) {
+    if (!CAPTURE.test(expected)) return errors.push(`${path}: ${JSON.stringify(expected)} is not a valid capture name; "@" is reserved`);
+    if (!Object.hasOwn(captures, expected)) {
+      if (typeof actual !== "string" || actual.length < 1 || actual.length > 64)
+        return errors.push(`${path}: capture ${expected} needs a conflictId string (1 to 64 characters), got ${JSON.stringify(actual)}`);
+      captures[expected] = actual;
+    } else if (captures[expected] !== actual) errors.push(`${path}: ${expected} was ${JSON.stringify(captures[expected])}, now ${JSON.stringify(actual)}`);
+    return;
+  }
+  if (expected === "*") {
+    if (typeof actual !== "string") errors.push(`${path}: expected any string, got ${typeOf(actual)}`);
+    return;
+  }
+  if (Array.isArray(expected)) {
+    if (!Array.isArray(actual) || actual.length !== expected.length) return errors.push(`${path}: expected array of ${expected.length}, got ${JSON.stringify(actual)}`);
+    expected.forEach((e, i) => matchBody(e, actual[i], captures, `${path}[${i}]`, errors));
+    return;
+  }
+  if (expected && typeof expected === "object") {
+    if (!actual || typeof actual !== "object" || Array.isArray(actual)) return errors.push(`${path}: expected object, got ${JSON.stringify(actual)}`);
+    const ek = Object.keys(expected).sort(), ak = Object.keys(actual).sort();
+    if (JSON.stringify(ek) !== JSON.stringify(ak)) errors.push(`${path}: keys ${ak.join(",")} differ from expected ${ek.join(",")}`);
+    for (const k of ek) if (k in actual) matchBody(expected[k], actual[k], captures, `${path}.${k}`, errors);
+    return;
+  }
+  if (expected !== actual) errors.push(`${path}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+}
+
+const substitute = (v, captures) =>
+  typeof v === "string" && Object.hasOwn(captures, v) ? captures[v]
+    : Array.isArray(v) ? v.map((x) => substitute(x, captures))
+    : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, substitute(x, captures)]))
+    : v;
+
+function responseDef(method, path, status) {
+  const name = new URL(path, "http://sync.invalid").pathname;
+  if (status === 400) return "errorBody";
+  if (status === 409) return "resyncError";
+  if (status !== 200) return null;
+  return { "/api/sync/v1/push": "pushResponse", "/api/sync/v1/changes": "changesResponse", "/api/sync/v1/conflicts": "conflictsResponse" }[name] ?? null;
+}
+
+// The sync fixtures must exist: a missing or empty directory, or a wrong file count, is a failure, never a skip.
+const EXPECTED_SYNC_FIXTURES = 18;
+let syncFiles = [];
+if (!existsSync(syncDir) || !statSync(syncDir).isDirectory()) expect("fixtures/sync exists", ["directory is missing"], true);
+else {
+  syncFiles = readdirSync(syncDir).filter((f) => f.endsWith(".json"));
+  expect("fixtures/sync is not empty", syncFiles.length ? [] : ["no fixture files"], true);
+  expect(`fixtures/sync has ${EXPECTED_SYNC_FIXTURES} fixture files`,
+    syncFiles.length === EXPECTED_SYNC_FIXTURES ? [] : [`found ${syncFiles.length}`], true);
+}
+for (const f of syncFiles) {
+  const scenario = load(join(syncDir, f));
+  const lib = createLibrary(scenario.epoch);
+  const captures = Object.create(null);
+  scenario.steps.forEach((s, i) => {
+    const label = `sync/${f} step ${i + 1}`;
+    const { method, path, body } = s.request;
+    const isPush = method === "POST" && path === "/api/sync/v1/push";
+    if (s.invalid_request) {
+      // The schema must reject the request, and the model must answer it with the expected 400 and change nothing.
+      if (!isPush) expect(`${label} invalid_request is only supported on push steps`, [`${method} ${path} is not a push request; the checker cannot verify it against the schema`], true);
+      else expect(`${label} invalid request is rejected by the schema`, check(syncSchema.$defs.pushRequest, body, syncSchema), false);
+    } else if (isPush) expect(`${label} request matches pushRequest`, check(syncSchema.$defs.pushRequest, body, syncSchema), true);
+    const actual = handle(lib, method, path, substitute(body, captures));
+    const def = responseDef(method, path, actual.status);
+    expect(`${label} response has a schema`, def ? [] : [`no schema for ${method} ${path} -> ${actual.status}`], true);
+    if (def) expect(`${label} response matches ${def}`, check(syncSchema.$defs[def], actual.body, syncSchema), true);
+    const errors = [];
+    if (!s.response) errors.push("step has no expected response");
+    else {
+      if (actual.status !== s.response.status) errors.push(`status ${actual.status}, expected ${s.response.status}`);
+      matchBody(s.response.body, actual.body, captures, "$", errors);
+      if (s.invalid_request && (s.response.status !== 400 || s.response.body?.error?.code !== "INVALID_REQUEST"))
+        errors.push("an invalid_request step must expect 400 INVALID_REQUEST");
+    }
+    expect(`${label} response matches expected`, errors, true);
+  });
 }
 
 console.log(`${passes} passed, ${failures} failed`);

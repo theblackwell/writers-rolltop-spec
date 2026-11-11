@@ -14,10 +14,14 @@ Any implementation (the native Apple apps, the self-hosted web studio, or a thir
 | [`docs/document-format-v1.md`](docs/document-format-v1.md) | Canonical scene document: shape, validity rules, normalization |
 | [`docs/archive-format-v1.md`](docs/archive-format-v1.md) | `.rolltop` archive layout, records, integrity rules, reader safety limits, error codes |
 | [`docs/compatibility-policy.md`](docs/compatibility-policy.md) | Versioning and forward/backward-compatibility rules |
+| [`docs/sync-protocol-v1.md`](docs/sync-protocol-v1.md) | Sync protocol v1: change model, push, pull, conflicts, errors (M1-5 draft) |
 | [`docs/m0-verification.md`](docs/m0-verification.md) | M0 verification report across all three repositories |
 | `schemas/` | JSON Schema 2020-12 for documents and every archive file |
+| `schemas/sync-v1.schema.json` | JSON Schema 2020-12 for the sync protocol wire shapes |
 | `fixtures/documents/` | `valid/`, `normalize/` (input → expected), `invalid/` (+ `expected.json` error codes) |
 | `fixtures/archives/` | `valid/` (including an expanded copy of the sample), `invalid/`, `malicious/`, and `expected.json` |
+| `fixtures/sync/` | Sync protocol scenarios (request/response steps) |
+| `tools/sync-model.mjs` | Reference model of sync protocol v1, used by the checker |
 | `tools/check-schemas.mjs` | Dependency-free check that fixtures match the schemas |
 | `tools/make_archive_fixtures.py` | Regenerates the invalid and malicious archives from a valid sample (stdlib only) |
 
