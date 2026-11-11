@@ -67,7 +67,7 @@ UUIDs are lowercase canonical form: `^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 
 1. **Closed schema.** No other block, inline or mark types and no extra fields. A `version` greater than the reader supports is rejected with `DOCUMENT_UNSUPPORTED_VERSION`, never partially read.
 2. Block IDs are unique within the document.
-3. Text must not contain U+0000–U+0008, U+000B, U+000C, U+000E–U+001F or U+007F after normalization. Line terminators are handled by normalization (rule N1). Tab (U+0009) is allowed.
+3. Text must not contain U+0000–U+0008, U+000B, U+000C, U+000E–U+001F or U+007F after normalization. Line terminators are handled by normalization (rule N1). Tab (U+0009) is allowed. A link `href` and an anchor id must not contain U+0000 either (added 2026-11-10 as an owner-approved tightening, matching the archive rule that text must not contain NUL; the document is rejected with `DOCUMENT_INVALID`).
 4. A text node has at most one `link` mark. A mark type other than `anchor` appears at most once per text node. An `anchor` id appears at most once per text node.
 5. All text nodes carrying a given anchor id are in **one block** and form **one contiguous run** of text nodes. A `hardBreak` inside the run is allowed; a text node without the anchor is not.
 6. Anchor IDs are unique across blocks: the same anchor never appears in two blocks.
