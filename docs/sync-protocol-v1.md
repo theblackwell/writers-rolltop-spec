@@ -1,6 +1,6 @@
 # Sync protocol, version 1
 
-Status: Draft period, format version 1, additive, M1-5. Owner decisions 2026-11-11 recorded.
+Status: Draft period, format version 1, additive, M1-5. Owner decisions 2026-11-11 recorded. Sync writes real archive records (see Values and Changes).
 
 ## Owner decisions
 
@@ -16,6 +16,8 @@ Status: Draft period, format version 1, additive, M1-5. Owner decisions 2026-11-
 Schemas: [`schemas/sync-v1.schema.json`](../schemas/sync-v1.schema.json). Fixtures: [`fixtures/sync/`](../fixtures/sync). Reference model: [`tools/sync-model.mjs`](../tools/sync-model.mjs). Versioning rules: [compatibility policy](compatibility-policy.md). Record and field names follow the [archive format](archive-format-v1.md); the document is the [canonical scene document](document-format-v1.md). Rationale for the compare-and-swap rule: [ADR-0001](adr/0001-m0-foundation.md) (a stale save fails and never overwrites).
 
 The protocol moves one author's library between that author's own devices and a server over HTTPS and JSON. It never discards text: a change that cannot be applied cleanly is kept as a conflict, and the author decides.
+
+The sync write path and the archive import and export use the same library tables, so each record has exactly one current state. A sync op changes that state; an archive export reads it. There is no separate sync copy of a record.
 
 **Not in this document:** authentication (M1-7), which is a single owner login. Every endpoint below is unauthenticated here. A server MUST NOT expose them without the M1-7 rules.
 
@@ -78,7 +80,7 @@ A change made by the same `deviceId` never causes a conflict for that device's `
 
 ### Rules per op
 
-**create.** The id must not exist (`RECORD_EXISTS`), even if the record was tombstoned. `value.id` must equal `recordId` (`INVALID_VALUE`). Kind `document` is `OP_UNSUPPORTED`. Appends a `create` change. A client pushes `create` before any other op for the same node (including `document` ops).
+**create.** The id must not exist (`RECORD_EXISTS`), even if the record was tombstoned. `value.id` must equal `recordId` (`INVALID_VALUE`). The value must be a valid archive record (see Values). Kind `document` is `OP_UNSUPPORTED`. Appends a `create` change. A client pushes `create` before any other op for the same node (including `document` ops).
 
 **set, unset.** The record must exist (`RECORD_UNKNOWN`). A reserved field is `FIELD_UNKNOWN`. Kind `document` is `OP_UNSUPPORTED`, as it is for `tombstone` and `restore`.
 - If the record is tombstoned: when the tombstone's seq is greater than `baseSeq` and its deviceId differs from the op's, the op is *eligible for restore* (the edit wins); otherwise `RECORD_DELETED`.
@@ -97,6 +99,32 @@ A change made by the same `deviceId` never causes a conflict for that device's `
 - Otherwise applied: revision increases by one, a `document` change with `revision` and `value` is appended, and the result carries `seq` and `revision`.
 
 **resolve.** An open conflict is closed: `applied`, no seq, no change. An unknown or already resolved id is `rejected` `CONFLICT_UNKNOWN`. Resolving closes the conflict and it no longer appears in the list. The server does not keep or expose the closed conflict or its `losing` value; only the stored result for the `resolve` opId remains, so a duplicate gets the same answer. A client MUST save the losing value locally before it sends `resolve`, because the server keeps no copy; the client, not the server, holds any losing value it has not chosen to keep. To keep one side, the client sends ordinary ops (for example a new `set` or `document` save based on the current state) before or after resolving. A later good save does not close a conflict by itself.
+
+### Values
+
+Sync values are real records. After an op is applied, the record it produces MUST be a valid archive v1 record for its kind. Minimal or partial test values are not allowed.
+
+- **create.** `value` is the whole record. It validates against the archive def for its kind in [`schemas/archive-v1.schema.json`](../schemas/archive-v1.schema.json) (`library` is the `library` object of `library.json`; `universe`, `series`, `book` and `manuscriptNode` are their own defs; the other kinds are the items of their archive files). All required archive properties are present, including `createdAt` and `updatedAt`, which the archive schema requires; the server keeps them as sent on create and derives every later `updatedAt` itself (those fields stay reserved and not settable). `deletedAt` is never in a create value: a record starts live and is trashed only by `tombstone`.
+- **set.** `value` is valid for that field in the archive def (for example `title`: a string). **unset** removes an optional field only; unsetting a required field would leave an invalid record and is `INVALID_VALUE`.
+- **Whole-record rules.** The archive integrity rules in [archive format v1](archive-format-v1.md) that apply to a record as a whole apply to the record the op produces: references resolve (a tombstoned target still resolves), scope, hierarchy (for example a `manuscriptNode` has an existing `bookId`, and a `parentId`, if present, is an existing manuscript node), and the other rules in that document.
+- **document.** `value` validates against [`schemas/document-v1.schema.json`](../schemas/document-v1.schema.json) and [document format v1](document-format-v1.md), with `nodeId` equal to `recordId`.
+
+Failures are a `rejected` op result with no change appended and no content stored:
+
+| Code | When |
+|---|---|
+| `INVALID_VALUE` | shape or typing: a missing required property, a wrong type, an unknown enum value, an unknown property where the def is closed, a `value.id` that is not `recordId` |
+| `REFERENCE_UNRESOLVED` | a reference does not resolve to an existing record (for example a `bookId` or `parentId` with no such record) |
+| `INTEGRITY_VIOLATION` | a rule violation (hierarchy, scope, field typing, duplicate id) |
+| `DOCUMENT_INVALID` | a `document` value that is not a valid canonical document |
+
+Since a rejected result is permanent for its opId and stores nothing, the client keeps the content (Client rules 8) and may send a corrected value under a new opId.
+
+**What the reference model checks.** [`tools/sync-model.mjs`](../tools/sync-model.mjs) enforces only two codes, for `manuscriptNode` creates: `INVALID_VALUE` when a required field (`bookId`, `kind`, `title`, `orderKey`, `createdAt`, `updatedAt`) is missing or not a string, `bookId` or an optional `parentId` is not a uuid, or `kind` is not one of the five node kinds; `REFERENCE_UNRESOLVED` when `bookId` is not an existing `book`, or `parentId` is not an existing `manuscriptNode`. It does not model the rest of the archive schema, the other kinds, set and unset values, document validity or the integrity rules. The full check is the server's job; a server conforms by rejecting every value that fails the archive schema, the integrity rules or the document schema. `node tools/check-schemas.mjs` validates every create, set and document value in the fixtures against the archive and document schemas, so the fixtures themselves are valid records; the two deliberately invalid steps in `rejected-permanent` are the exception, marked `invalid_value`. The fixtures run by a server's own runner cover the full check.
+
+### Storage
+
+A sync write and an archive export read and write the same library tables, so every record has exactly one current state. A `tombstone` sets `deletedAt` on the record; `restore` clears it. A record trashed this way is exported with its `deletedAt`, like any trashed record. Ancestry hiding (a trashed node hides its children in reads) is a store read rule and applies to sync reads too. The tombstone conflict rule still does not check cascades (see Not covered).
 
 ### Idempotency
 
@@ -119,7 +147,7 @@ A conflict is `{conflictId, kind, recordKind, recordId, field?, losing, current}
 
 ### Per-op rejection codes
 
-`RECORD_EXISTS`, `RECORD_UNKNOWN`, `RECORD_DELETED`, `RECORD_NOT_DELETED`, `FIELD_UNKNOWN`, `INVALID_VALUE`, `REFERENCE_UNRESOLVED`, `INTEGRITY_VIOLATION`, `DOCUMENT_INVALID`, `OP_UNSUPPORTED`, `CONFLICT_UNKNOWN`. The reference model produces `RECORD_EXISTS`, `RECORD_UNKNOWN`, `RECORD_DELETED`, `RECORD_NOT_DELETED`, `FIELD_UNKNOWN`, `INVALID_VALUE`, `OP_UNSUPPORTED` and `CONFLICT_UNKNOWN`. `REFERENCE_UNRESOLVED`, `INTEGRITY_VIOLATION` and `DOCUMENT_INVALID` are possible from a server that checks values against the archive and document rules, but they are not modelled, and v1 fixtures do not use them. Protocol fixtures use minimal record values.
+`RECORD_EXISTS`, `RECORD_UNKNOWN`, `RECORD_DELETED`, `RECORD_NOT_DELETED`, `FIELD_UNKNOWN`, `INVALID_VALUE`, `REFERENCE_UNRESOLVED`, `INTEGRITY_VIOLATION`, `DOCUMENT_INVALID`, `OP_UNSUPPORTED`, `CONFLICT_UNKNOWN`. The reference model produces `RECORD_EXISTS`, `RECORD_UNKNOWN`, `RECORD_DELETED`, `RECORD_NOT_DELETED`, `FIELD_UNKNOWN`, `INVALID_VALUE`, `REFERENCE_UNRESOLVED` (manuscriptNode creates), `OP_UNSUPPORTED` and `CONFLICT_UNKNOWN`. `INTEGRITY_VIOLATION` and `DOCUMENT_INVALID` are required of a server (see Values) but are not modelled, and v1 fixtures do not use them. Fixture values are valid archive records and documents.
 
 ## Errors
 
@@ -156,12 +184,16 @@ A server restored or rolled back from a backup MUST start a new epoch. Otherwise
 - iCloud transport on Apple (a different transport for the same change model, later).
 - Conflict resolution UI (the protocol only stores and lists open conflicts).
 - Log compaction and retention of old changes.
-- Tombstone-conflict scope: the tombstone rule looks only at changes to the one record. Cascade effects (tombstoning a parent while a child is edited) and dangling references (`REFERENCE_UNRESOLVED`, `INTEGRITY_VIOLATION`) are not checked in v1.
+- Tombstone-conflict scope: the tombstone rule looks only at changes to the one record. Cascade effects (tombstoning a parent while a child is edited) are not checked by the tombstone rule in v1. Reference and integrity checks on values are covered by Values, not by the tombstone rule.
 - Known gap, fixed in the model: `validatePush` counted string length in UTF-16 units while the schema counts code points, which differs for astral characters. The model now counts code points (`[...str].length`) to match the schema.
 - Detecting a cloned or restored `deviceId` (open risk, Client rules 6).
-- Server-side validation of values against the archive rules. The archive and document fixtures cover values.
+- The reference model does not validate values beyond the two `manuscriptNode` create checks listed in Values; full validation is the server's job.
 - The 413 limits are specified but not exercised by the reference model.
 
 ## Conformance
 
 The sync fixtures are normative for rules above. `node tools/check-schemas.mjs` checks every fixture request against the schema, runs the reference model, validates each response against the schema, and compares it with the expected body. In a fixture, `@name` (an `@`, a letter, then letters or digits) captures a value on first use and must match later; a request string equal to a captured `@name` is replaced by the captured value; `*` matches any string. Captures are for conflict ids only: the first-use value must be a string of 1 to 64 characters, and any other type fails (the response is also checked against the schema). The sigil `@` is reserved: a fixture literal must not start with `@`, and the checker rejects an expected string that does and is not a valid capture name. A step marked `invalid_request` must be rejected by the schema, and the model must answer it with the expected 400. The checker fails if `fixtures/sync` is missing or empty or does not hold the expected number of scenario files. Open note: captures are not tied to a field position; an `@name` in any string field of a request or expected body captures. Behaviour is unchanged. A server conforms when it produces the same status and body for every step on a fresh library (with the fixture's epoch), other than the `at` values, which the reference clock fixes at `2026-11-11T12:00:00Z`.
+
+## Changes
+
+- 2026-11-11 (owner decision, option 1: sync writes real records). Draft period of sync protocol v1, additive. Added the Values and Storage sections: every op value must produce a valid archive v1 record (documents: valid canonical documents with `nodeId` equal to the record id), failures are `INVALID_VALUE`, `REFERENCE_UNRESOLVED`, `INTEGRITY_VIOLATION` and `DOCUMENT_INVALID`, and sync shares the library tables with archive import and export so each record has one current state. Removed the statements that value validation was not covered and that fixtures use minimal values. The owner decisions and the six rules are unchanged. Fixtures: every create value is a valid archive record and every document value a valid document; scenarios create a library and a book first (seq 1 and 2), so later seq numbers, heads and bases shift by 2; `rejected-permanent` gained steps for `REFERENCE_UNRESOLVED` and `INVALID_VALUE`, and its `unset` now removes the optional `synopsis` (a required field cannot be unset). The reference model enforces the two codes for `manuscriptNode` creates, and the checker validates fixture values against the archive and document schemas. Why: the server applies sync ops to the same tables as import and export, so there is one copy of each record and its values must be real.

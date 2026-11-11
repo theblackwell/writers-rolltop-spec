@@ -49,6 +49,7 @@ const MESSAGES = {
   RECORD_NOT_DELETED: "The record is not in the trash.",
   FIELD_UNKNOWN: "This field cannot be set.",
   INVALID_VALUE: "The value does not fit the record.",
+  REFERENCE_UNRESOLVED: "The value refers to a record that does not exist.",
   OP_UNSUPPORTED: "This operation is not supported for this record kind.",
   CONFLICT_UNKNOWN: "No open conflict with this id.",
 };
@@ -156,6 +157,14 @@ function applyOp(lib, deviceId, op) {
       if (op.recordKind === "document") return reject("OP_UNSUPPORTED");
       if (lib.records.has(op.recordId)) return reject("RECORD_EXISTS");
       if (!op.value || op.value.id !== op.recordId) return reject("INVALID_VALUE");
+      if (op.recordKind === "manuscriptNode") {
+        // Partial value check (the full archive check is the server's job, see "Values" in the protocol doc):
+        // required string fields have the right type, kind is in the enum, then the references resolve.
+        const bad = checkNodeShape(op.value);
+        if (bad) return reject(bad);
+        const unresolved = checkNodeReferences(lib, op.value);
+        if (unresolved) return reject(unresolved);
+      }
       lib.records.set(op.recordId, { kind: op.recordKind, tombstone: null, revision: 0 });
       const ch = append(lib, deviceId, op, { change: "create", recordKind: op.recordKind, recordId: op.recordId, value: op.value });
       return { status: "applied", seq: ch.seq };
@@ -172,6 +181,23 @@ function applyOp(lib, deviceId, op) {
     }
   }
   return reject("OP_UNSUPPORTED");
+}
+
+const NODE_KINDS = new Set(["part", "chapter", "scene", "frontMatter", "backMatter"]);
+// manuscriptNode create value: INVALID_VALUE when a required field is missing or has the wrong type.
+// Required (archive $defs.manuscriptNode): id, bookId, kind, title, orderKey, createdAt, updatedAt. Optional parentId is a uuid string.
+function checkNodeShape(v) {
+  for (const k of ["bookId", "kind", "title", "orderKey", "createdAt", "updatedAt"]) if (typeof v[k] !== "string") return "INVALID_VALUE";
+  if (!isUuid(v.bookId) || !NODE_KINDS.has(v.kind)) return "INVALID_VALUE";
+  if ("parentId" in v && !isUuid(v.parentId)) return "INVALID_VALUE";
+  return null;
+}
+// manuscriptNode create value: REFERENCE_UNRESOLVED when the book does not exist, or parentId is not an existing manuscriptNode.
+// A tombstoned target still resolves (archive integrity rules).
+function checkNodeReferences(lib, v) {
+  if (lib.records.get(v.bookId)?.kind !== "book") return "REFERENCE_UNRESOLVED";
+  if ("parentId" in v && lib.records.get(v.parentId)?.kind !== "manuscriptNode") return "REFERENCE_UNRESOLVED";
+  return null;
 }
 
 // Returns the record, or a rejected result when the op cannot address one.

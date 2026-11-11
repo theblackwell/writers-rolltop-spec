@@ -191,6 +191,52 @@ function responseDef(method, path, status) {
   return { "/api/sync/v1/push": "pushResponse", "/api/sync/v1/changes": "changesResponse", "/api/sync/v1/conflicts": "conflictsResponse" }[name] ?? null;
 }
 
+// Sync values are real archive records (docs/sync-protocol-v1.md, "Values"). Archive schema for the value of a create op of this kind,
+// or null when the kind has none here. The library record is the `library` property of library.json; the plural defs are arrays of records.
+function recordSchema(kind) {
+  const d = archiveSchema.$defs;
+  if (kind === "library") return d.library.properties.library;
+  if (["universe", "series", "book", "manuscriptNode"].includes(kind)) return d[kind];
+  const plural = { reference: "references", note: "notes", template: "templates", field: "fields", entry: "entries", fact: "facts", question: "questions", event: "events", stateChange: "stateChanges" }[kind];
+  if (plural) return d[plural].items;
+  if (kind === "relationshipType") return d.relationships.properties.relationshipTypes.items;
+  if (kind === "relationship") return d.relationships.properties.relationships.items;
+  return null;
+}
+const RESERVED_SYNC_FIELDS = new Set(["id", "createdAt", "updatedAt", "deletedAt"]);
+
+// Every create value must validate against the archive def for its kind, every document value against document-v1
+// (nodeId equal to the record id), and every set value against the archive property it sets. The one exception is a step marked
+// `invalid_value`: it must fail the archive schema and be answered with a rejected INVALID_VALUE.
+function checkSyncValues(label, step) {
+  const ops = step.request.body?.ops;
+  if (!Array.isArray(ops) || step.invalid_request) return;
+  let sawInvalid = false;
+  ops.forEach((op, i) => {
+    const l = `${label} op ${i + 1} (${op.op} ${op.recordKind})`;
+    if (op.op === "create" && op.recordKind !== "document") {
+      const schema = recordSchema(op.recordKind);
+      if (!schema) return expect(`${l} has an archive schema`, [`no archive def for kind ${op.recordKind}`], true);
+      const errors = check(schema, op.value, archiveSchema);
+      if (step.invalid_value) {
+        sawInvalid = true;
+        expect(`${l} value is deliberately invalid (invalid_value)`, errors, false);
+      } else expect(`${l} value is a valid archive record`, errors, true);
+    } else if (op.op === "set" && op.recordKind !== "document") {
+      const prop = recordSchema(op.recordKind)?.properties?.[op.field];
+      if (prop && !RESERVED_SYNC_FIELDS.has(op.field)) expect(`${l} value fits archive field ${op.field}`, check(prop, op.value, archiveSchema), true);
+    } else if (op.op === "document") {
+      const errors = check(documentSchema, op.value, documentSchema);
+      if (op.value?.nodeId !== op.recordId) errors.push("nodeId differs from recordId");
+      expect(`${l} value is a valid document`, errors, true);
+    }
+  });
+  if (step.invalid_value) {
+    const codes = (step.response?.body?.results ?? []).map((r) => r.code);
+    expect(`${label} invalid_value step is answered INVALID_VALUE`, sawInvalid && codes.includes("INVALID_VALUE") ? [] : ["needs a create op and a rejected INVALID_VALUE result"], true);
+  }
+}
+
 // The sync fixtures must exist: a missing or empty directory, or a wrong file count, is a failure, never a skip.
 const EXPECTED_SYNC_FIXTURES = 18;
 let syncFiles = [];
@@ -208,6 +254,7 @@ for (const f of syncFiles) {
   scenario.steps.forEach((s, i) => {
     const label = `sync/${f} step ${i + 1}`;
     const { method, path, body } = s.request;
+    checkSyncValues(label, s);
     const isPush = method === "POST" && path === "/api/sync/v1/push";
     if (s.invalid_request) {
       // The schema must reject the request, and the model must answer it with the expected 400 and change nothing.
