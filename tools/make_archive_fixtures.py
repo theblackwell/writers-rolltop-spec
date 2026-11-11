@@ -239,6 +239,13 @@ def main(sample):
     write(inv / "duplicate-dismissed-warning.rolltop", recompute(edit_json(base, "bible/facts.json", duplicate_dismissal)))
     expected["invalid/duplicate-dismissed-warning.rolltop"] = "SCHEMA_VIOLATION"
 
+    # U+0000 (NUL) in archive text. It is legal JSON as the escape \u0000, so the file parses; the
+    # reader rejects it (archive-format-v1.md, "Common value types"). PostgreSQL cannot store it.
+    def nul_in_synopsis(lib):
+        next(n for n in lib["manuscriptNodes"] if n["kind"] == "scene")["synopsis"] = "A synopsis with a NUL\u0000 inside"
+    write(inv / "nul-in-text.rolltop", recompute(edit_json(base, "library.json", nul_in_synopsis)))
+    expected["invalid/nul-in-text.rolltop"] = "SCHEMA_VIOLATION"
+
     (ROOT / "expected.json").write_bytes(dumps(dict(sorted(expected.items()))))
     print(f"wrote {len(expected)} archive fixtures to {ROOT}")
 

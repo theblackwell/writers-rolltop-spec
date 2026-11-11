@@ -35,6 +35,8 @@ Every listed JSON file is required (use `[]` or the empty object form when there
 
 Optional properties are **omitted** when absent; `null` is not used. Integers must be within ±(2^53−1) for JavaScript interop.
 
+Text must not contain U+0000 (NUL). This covers every string value and every property name in every JSON file of the archive. (A NUL can only appear in JSON as the escape `\u0000`.) Readers reject such an archive with `SCHEMA_VIOLATION`, naming the file and the record id, never the text. Reason: PostgreSQL cannot store NUL, so the self-hosted server could not hold what the apps accept. Document text already bans U+0000 ([document format](document-format-v1.md), rule 3); inside a document the code stays `DOCUMENT_INVALID`. Added 2026-11-10 inside the draft period of version 1 as a tightening; see [compatibility policy](compatibility-policy.md), rules 1 and 7.
+
 ## Files
 
 ### `manifest.json`
@@ -220,7 +222,7 @@ Records have no state changes, so a record's As-of view in book B is simply its 
 | Invalid UTF-8 | rejected | `ARCHIVE_INVALID_UTF8` |
 | Malformed JSON | rejected | `ARCHIVE_INVALID_JSON` |
 | Wrong `format`, newer version | rejected | `ARCHIVE_NOT_ROLLTOP`, `ARCHIVE_UNSUPPORTED_VERSION` |
-| Shape or type violation | rejected | `SCHEMA_VIOLATION` |
+| Shape or type violation, including U+0000 in a string value or property name | rejected | `SCHEMA_VIOLATION` |
 | Unresolved reference | rejected | `REFERENCE_UNRESOLVED` |
 | Rule violation (hierarchy, scope, field typing, duplicate id) | rejected | `INTEGRITY_VIOLATION` |
 | Invalid document | rejected | `DOCUMENT_INVALID`, `DOCUMENT_UNSUPPORTED_VERSION` |
