@@ -156,7 +156,7 @@ Continuity warnings are worked out from the records, never from the prose, so ev
 | About a missing entry | fact | `aboutMissingEntry:<entryId>` | an `entryIds` entry is tombstoned |
 | Knower missing | fact | `knowerMissing:<knower>` | a character knower is tombstoned |
 | Undecided but known | fact | `undecidedButKnown` | `truth` is `undecided` and `knowledge` isn't empty |
-| Question overdue | question | `questionOverdue:<nodeId>` | an `open` question's `nodeId` (live) already has text: the scene's document, or any document under the chapter, has at least one word |
+| Question overdue | question | `questionOverdue:<nodeId>` | an `open` question's `nodeId` (live) already has text: the scene's document, or any document under the chapter, has at least one word; only live text counts, so a tombstoned scene or chapter, or anything inside one or inside a tombstoned part or book, adds none |
 | State conflict | event | `stateConflict:<entryId>:<fieldId>` | live state changes at this event set the entry's field to different values (`W_STATE_CONFLICT`) |
 
 `<knower>` is `reader` or the character's id. Only live facts, questions and events have warnings. For records with book overrides, the warnings are worked out per book (see below).
