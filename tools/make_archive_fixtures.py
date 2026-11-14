@@ -122,6 +122,13 @@ def main(sample):
     write(valid / "unknown-optional-fields.rolltop", future)
     expected["valid/unknown-optional-fields.rolltop"] = "VALID"
 
+    # Goal word counts run 1 to 9,999,999 (archive-format-v1.md); the top of the range is valid.
+    def goal_limit(v):
+        v["books"][0]["targetWordCount"] = 9999999
+        next(n for n in v["manuscriptNodes"] if n["kind"] == "chapter")["targetWordCount"] = 9999999
+    write(valid / "goal-limit.rolltop", recompute(edit_json(base, "library.json", goal_limit)))
+    expected["valid/goal-limit.rolltop"] = "VALID"
+
     # Book overrides on shared facts, questions and events (optional `overrides`).
     # The expanded copy lets check-schemas.mjs validate every file of the archive.
     overridden = record_overrides(base)
@@ -245,6 +252,12 @@ def main(sample):
         next(n for n in lib["manuscriptNodes"] if n["kind"] == "scene")["synopsis"] = "A synopsis with a NUL\u0000 inside"
     write(inv / "nul-in-text.rolltop", recompute(edit_json(base, "library.json", nul_in_synopsis)))
     expected["invalid/nul-in-text.rolltop"] = "SCHEMA_VIOLATION"
+
+    # A goal above 9,999,999 breaks the schema maximum.
+    def goal_too_big(v):
+        v["books"][0]["targetWordCount"] = 10000000
+    write(inv / "goal-over-limit.rolltop", recompute(edit_json(base, "library.json", goal_too_big)))
+    expected["invalid/goal-over-limit.rolltop"] = "SCHEMA_VIOLATION"
 
     (ROOT / "expected.json").write_bytes(dumps(dict(sorted(expected.items()))))
     print(f"wrote {len(expected)} archive fixtures to {ROOT}")
