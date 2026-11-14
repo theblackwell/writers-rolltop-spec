@@ -156,6 +156,18 @@
         "recordId": { "$ref": "#/$defs/uuid" }
       }
     },
+    "purgeOp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["opId", "op", "recordKind", "recordId", "baseSeq"],
+      "properties": {
+        "opId": { "$ref": "#/$defs/uuid" },
+        "op": { "const": "purge" },
+        "recordKind": { "$ref": "#/$defs/changeRecordKind" },
+        "recordId": { "$ref": "#/$defs/uuid" },
+        "baseSeq": { "$ref": "#/$defs/seq" }
+      }
+    },
     "documentOp": {
       "type": "object",
       "additionalProperties": false,
@@ -186,6 +198,7 @@
         { "$ref": "#/$defs/unsetOp" },
         { "$ref": "#/$defs/tombstoneOp" },
         { "$ref": "#/$defs/restoreOp" },
+        { "$ref": "#/$defs/purgeOp" },
         { "$ref": "#/$defs/documentOp" },
         { "$ref": "#/$defs/resolveOp" }
       ]
@@ -223,7 +236,8 @@
         "status": { "const": "applied" },
         "seq": { "$ref": "#/$defs/seq" },
         "revision": { "$ref": "#/$defs/seq" },
-        "conflictId": { "$ref": "#/$defs/conflictId" }
+        "conflictId": { "$ref": "#/$defs/conflictId" },
+        "overridesRemoved": { "$ref": "#/$defs/seq" }
       }
     },
     "duplicateResult": {
@@ -297,7 +311,7 @@
         "at": { "$ref": "#/$defs/timestamp" },
         "opId": { "$ref": "#/$defs/uuid" },
         "deviceId": { "$ref": "#/$defs/uuid" },
-        "change": { "enum": ["create", "set", "unset", "tombstone", "restore", "document"] },
+        "change": { "enum": ["create", "set", "unset", "tombstone", "restore", "document", "purge"] },
         "recordKind": { "$ref": "#/$defs/changeRecordKind" },
         "recordId": { "$ref": "#/$defs/uuid" },
         "field": { "$ref": "#/$defs/field" },
@@ -326,7 +340,7 @@
       "properties": {
         "opId": { "$ref": "#/$defs/uuid" },
         "deviceId": { "$ref": "#/$defs/uuid" },
-        "change": { "enum": ["set", "unset", "tombstone", "document"] },
+        "change": { "enum": ["set", "unset", "tombstone", "purge", "document"] },
         "baseSeq": { "$ref": "#/$defs/seq" },
         "baseRevision": { "$ref": "#/$defs/seq" },
         "seq": { "$ref": "#/$defs/seq" },

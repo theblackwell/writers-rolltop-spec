@@ -249,7 +249,7 @@ function checkSyncValues(label, step) {
 }
 
 // The sync fixtures must exist: a missing or empty directory, or a wrong file count, is a failure, never a skip.
-const EXPECTED_SYNC_FIXTURES = 18;
+const EXPECTED_SYNC_FIXTURES = 26;
 let syncFiles = [];
 if (!existsSync(syncDir) || !statSync(syncDir).isDirectory()) expect("fixtures/sync exists", ["directory is missing"], true);
 else {

@@ -236,6 +236,13 @@ def main(sample):
           lambda fs: set_record_field(fs, SERIES_FACT, "overrides", [{"bookId": SALT_BOOK, "text": "Changed", "colour": "red"}]))))
     expected["invalid/record-override-unknown-key.rolltop"] = "SCHEMA_VIOLATION"
 
+    # A series with no universe holds only books with no universe (archive-format-v1.md, hierarchy): dropping the
+    # universe of a series whose books have one breaks the equality. A cross-record rule, so INTEGRITY_VIOLATION.
+    def series_loses_universe(lib):
+        next(sr for sr in lib["series"] if "universeId" in sr).pop("universeId")
+    write(inv / "series-without-universe-holds-universe-book.rolltop", recompute(edit_json(base, "library.json", series_loses_universe)))
+    expected["invalid/series-without-universe-holds-universe-book.rolltop"] = "INTEGRITY_VIOLATION"
+
     write(inv / "scene-at-root.rolltop", recompute(edit_json(base, "library.json",
           lambda lib: next(n for n in lib["manuscriptNodes"] if n["kind"] == "scene").pop("parentId"))))
     expected["invalid/scene-at-root.rolltop"] = "INTEGRITY_VIOLATION"

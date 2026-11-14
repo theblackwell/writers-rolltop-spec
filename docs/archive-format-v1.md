@@ -55,7 +55,7 @@ Text must not contain U+0000 (NUL). This covers every string value and every pro
   manuscriptNodes: [ { id, bookId, parentId?, kind, title, synopsis?, status?, povEntryId?, settingEntryId?, targetWordCount?, plan?,
                        orderKey, createdAt, updatedAt, deletedAt? } ] }
 ```
-- Hierarchy is Library → Universe? → Series? → Book → Part? → Chapter → Scene. If a book has `seriesId` and that series has `universeId`, the book's `universeId` must be equal. A series with `universeId` makes the book's `universeId` required.
+- Hierarchy is Library → Universe? → Series? → Book → Part? → Chapter → Scene. If a book has `seriesId`, the book's `universeId` must equal its series' `universeId`: both absent, or the same universe. A series with a `universeId` makes the book's `universeId` required, and a series with no `universeId` holds only books with no `universeId`.
 - `targetWordCount` (integer 1 to 9,999,999) and `targetDate` (`YYYY-MM-DD`) are the author's optional goal for the book. Goals are informational and never restrict writing.
 - `logline`, `premise`, `themes`, `arcs` and `principles` are the book's story overview: plain text, 1–20,000 characters each.
 - `bibleVersion` (1–32 characters, such as `1.8`) is the version label of the story bible last exported for the book. Exported copies themselves are not part of the archive.
@@ -146,7 +146,7 @@ Applications show advisory continuity warnings (below). An author can mark one a
 - Readers MUST keep keys they don't recognize, including keys of warning kinds added later. A key is at most 400 characters and matches `^[A-Za-z]+(:[0-9A-Za-z-]+)*$`.
 - An array is never empty: omit the property instead.
 
-Continuity warnings are worked out from the records, never from the prose, so every edition finds the same ones. "Before" means earlier in story order: books in the order of the story they belong to (the fact's or question's scope), then each book's reading order, where a chapter comes just before its scenes.
+Continuity warnings are worked out from the records, never from the prose, so every edition finds the same ones. "Before" means earlier in story order: books in the order of the story they belong to (the fact's or question's scope), then each book's reading order, where a chapter comes just before its scenes. A fact, question or event whose `scope` is a trashed universe, a trashed series, or a series inside a trashed universe raises no warning (it is not shown), and nor does a record scoped to a book inside a trashed series or universe; the warning returns when the universe or series is restored.
 
 | Warning | On | Key | Shown when |
 |---|---|---|---|
@@ -196,7 +196,25 @@ Records have no state changes, so a record's As-of view in book B is simply its 
 - IDs are globally unique across all record types in an archive. The exception is attachments, which are keyed by hash.
 - Every reference resolves, including to tombstoned records. Records with `deletedAt` are trash and are exported so they can be restored.
 - References from live records to tombstoned ones are **warnings**, not errors.
-- A universe or series cannot be trashed (`deletedAt` set) while any live shared record in its scope exists: a fact, entry, question or event whose `scope` is that universe or series and that is not itself trashed. Trash those records first. A record scoped to a book (inside it or not) never blocks. Only the record's own `deletedAt` matters: a live record whose book is trashed still counts. Restoring the universe or series is always allowed, and restoring the universe or series is always allowed. A writer (a sync `tombstone`, an editor) refuses the change with `INTEGRITY_VIOLATION` (a rule violation; no new code). This is a rule about the act of trashing, not about archive contents: a reader does not reject an archive that holds a trashed universe or series with live shared records in its scope (trash is exported so it can be restored, see above), and need not warn.
+- A book's `universeId` equals its series' `universeId`: both absent, or the same universe. A series with no universe holds only books with no universe, and a series with a universe holds only books of that universe. Breach: `INTEGRITY_VIOLATION`.
+- A purged book or series is gone: sync's `purge` op (see [sync protocol](sync-protocol-v1.md)) permanently removes it and everything that belongs to it, and an export simply omits those records (there is nothing to restore). Its overrides on records that stay go too, from their history as well. Its attachment rows, and any attachment file no remaining record uses, go with it. Trash and restore stay as above for every record, books and series included; only a purge is permanent. A purge takes no backup: archives, exports and backups made earlier are out of its reach and can bring the records back.
+
+## Writer rules (not checked on import)
+
+These rules govern the act of changing a library: they apply to the sync write path (a `create`, `set`, `unset`, `tombstone` or `purge`), and an editor that writes through it follows them. A reader does not check them: an archive that holds a state a writer would refuse is not rejected on import (trash is exported so it can be restored, see above), and the reader need not warn. A writer refuses a breach with `INTEGRITY_VIOLATION` (a rule violation; no new code) and stores nothing.
+
+- Trashing a universe or series is always allowed, whatever its scope holds. Its shared records are hidden by the display rules below and come back when it is restored. Restore is always allowed, for every kind of record.
+- Nothing new is added to a trashed universe or series. A live fact, entry, question or event cannot be created with a `scope` that is a trashed universe or series, nor moved into one by changing its `scope`; a book cannot be created in, or moved into, a trashed universe or series (`universeId`, `seriesId`); a series cannot be created in, or moved into, a trashed universe. A live series that sits in a trashed universe counts as trashed. Restore the universe or series first. Book-scoped records are not affected, and a record already in a trashed scope stays editable.
+- A book does not move out of a series or universe while records that stay would be left pointing outside the new scope. A `set` or `unset` of a book's `seriesId` or `universeId` is refused while any of these links to the book remain on the shared records (entries, facts, questions, events) of the scope it would leave: overrides of the book; a fact's or question's `nodeId`, a fact's knowledge entries and an event's `sceneIds` that name a scene or chapter of the book; state changes at a scene of the book on such an entry; and the `povEntryId` and `settingEntryId` of the book's nodes that name such an entry. Links held by records in the trash count too, and the message says so; a writer lets the author unlink them in place. The refusal message gives counts and kinds only, for example "Unlink first: 3 scene links (2 in the trash)."
+- A series that has books, live or trashed, keeps its `universeId`: a `set` or `unset` of it is refused with the message "Move its books out of the series first." A series with no books may change or drop its universe freely.
+- A purge of a book or series is refused while a record that stays still points into what it would remove, and a purge of a series is refused while any book (live or trashed) is still in it. See the `purge` rule in the sync protocol.
+
+## Display rules
+
+A child is not shown when its parent is trashed. These rules decide what an application shows and exports; nothing is stored differently, no `deletedAt` changes, and a restore brings everything back.
+
+- A fact, entry, question or event whose `scope` is a trashed universe, a trashed series, or a series inside a trashed universe is not shown: an application leaves it out of its lists and the story-bible export, and it has no continuity warnings.
+- A book inside a trashed series or universe (or in a series inside a trashed universe) is not shown, and neither are the records scoped to it (the bible export of such a book is not found). A book that is itself in the trash follows the existing trash rules.
 
 ## Forward compatibility
 
@@ -225,7 +243,7 @@ Records have no state changes, so a record's As-of view in book B is simply its 
 | Wrong `format`, newer version | rejected | `ARCHIVE_NOT_ROLLTOP`, `ARCHIVE_UNSUPPORTED_VERSION` |
 | Shape or type violation, including U+0000 in a string value or property name | rejected | `SCHEMA_VIOLATION` |
 | Unresolved reference | rejected | `REFERENCE_UNRESOLVED` |
-| Rule violation (hierarchy, scope, field typing, duplicate id) | rejected | `INTEGRITY_VIOLATION` |
+| Rule violation (hierarchy, scope, field typing, duplicate id, a book's universe differing from its series') | rejected | `INTEGRITY_VIOLATION` |
 | Invalid document | rejected | `DOCUMENT_INVALID`, `DOCUMENT_UNSUPPORTED_VERSION` |
 
 The limits are defaults. Implementations may make them configurable but must not remove them. Readers never write outside a private staging location, and never touch a live library, until validation has succeeded.

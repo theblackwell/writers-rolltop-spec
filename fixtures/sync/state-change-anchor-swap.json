@@ -1,0 +1,299 @@
+{
+  "description": "A trashed state change that names a scene can be re-pointed at an event: a set of its eventId is applied in place, the state change stays in the trash, and its nodeId is gone.",
+  "epoch": "11111111-1111-4111-8111-111111111111",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000001",
+              "op": "create",
+              "recordKind": "library",
+              "recordId": "00000001-1111-4111-8111-111111111111",
+              "value": {
+                "id": "00000001-1111-4111-8111-111111111111",
+                "title": "Fixture library",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000002",
+              "op": "create",
+              "recordKind": "book",
+              "recordId": "00000003-1111-4111-8111-111111111111",
+              "value": {
+                "id": "00000003-1111-4111-8111-111111111111",
+                "title": "Fixture book",
+                "orderKey": "m",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000003",
+              "op": "create",
+              "recordKind": "manuscriptNode",
+              "recordId": "00000004-1111-4111-8111-111111111111",
+              "value": {
+                "id": "00000004-1111-4111-8111-111111111111",
+                "bookId": "00000003-1111-4111-8111-111111111111",
+                "kind": "chapter",
+                "title": "Chapter",
+                "orderKey": "m",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000004",
+              "op": "create",
+              "recordKind": "template",
+              "recordId": "0000000b-1111-4111-8111-111111111111",
+              "value": {
+                "id": "0000000b-1111-4111-8111-111111111111",
+                "name": "Template",
+                "entryType": "character",
+                "builtIn": false,
+                "orderKey": "m",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000005",
+              "op": "create",
+              "recordKind": "field",
+              "recordId": "0000000c-1111-4111-8111-111111111111",
+              "value": {
+                "id": "0000000c-1111-4111-8111-111111111111",
+                "templateId": "0000000b-1111-4111-8111-111111111111",
+                "key": "mood",
+                "label": "Mood",
+                "fieldType": "shortText",
+                "required": false,
+                "orderKey": "m",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000006",
+              "op": "create",
+              "recordKind": "entry",
+              "recordId": "00000006-1111-4111-8111-111111111111",
+              "value": {
+                "id": "00000006-1111-4111-8111-111111111111",
+                "entryType": "character",
+                "templateId": "0000000b-1111-4111-8111-111111111111",
+                "name": "Ada",
+                "aliases": [],
+                "scope": {
+                  "kind": "book",
+                  "id": "00000003-1111-4111-8111-111111111111"
+                },
+                "values": {},
+                "overrides": [],
+                "attachments": [],
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000007",
+              "op": "create",
+              "recordKind": "event",
+              "recordId": "0000000d-1111-4111-8111-111111111111",
+              "value": {
+                "id": "0000000d-1111-4111-8111-111111111111",
+                "scope": {
+                  "kind": "book",
+                  "id": "00000003-1111-4111-8111-111111111111"
+                },
+                "title": "Siege",
+                "orderKey": "m",
+                "sceneIds": [],
+                "participants": [],
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000008",
+              "op": "create",
+              "recordKind": "stateChange",
+              "recordId": "0000000e-1111-4111-8111-111111111111",
+              "value": {
+                "id": "0000000e-1111-4111-8111-111111111111",
+                "nodeId": "00000004-1111-4111-8111-111111111111",
+                "entryId": "00000006-1111-4111-8111-111111111111",
+                "fieldId": "0000000c-1111-4111-8111-111111111111",
+                "value": "grim",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 8,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000001",
+              "status": "applied",
+              "seq": 1
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000002",
+              "status": "applied",
+              "seq": 2
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000003",
+              "status": "applied",
+              "seq": 3
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000004",
+              "status": "applied",
+              "seq": 4
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000005",
+              "status": "applied",
+              "seq": 5
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000006",
+              "status": "applied",
+              "seq": 6
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000007",
+              "status": "applied",
+              "seq": 7
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000008",
+              "status": "applied",
+              "seq": 8
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000009",
+              "op": "tombstone",
+              "recordKind": "stateChange",
+              "recordId": "0000000e-1111-4111-8111-111111111111",
+              "baseSeq": 8
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 9,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000009",
+              "status": "applied",
+              "seq": 9
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-00000000000a",
+              "op": "set",
+              "recordKind": "stateChange",
+              "recordId": "0000000e-1111-4111-8111-111111111111",
+              "field": "eventId",
+              "baseSeq": 9,
+              "value": "0000000d-1111-4111-8111-111111111111"
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 10,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-00000000000a",
+              "status": "applied",
+              "seq": 10
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/sync/v1/changes?epoch=11111111-1111-4111-8111-111111111111&after=8&limit=1000"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 10,
+          "changes": [
+            {
+              "seq": 9,
+              "at": "2026-11-11T12:00:00Z",
+              "opId": "00000000-0000-4000-8000-000000000009",
+              "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+              "change": "tombstone",
+              "recordKind": "stateChange",
+              "recordId": "0000000e-1111-4111-8111-111111111111"
+            },
+            {
+              "seq": 10,
+              "at": "2026-11-11T12:00:00Z",
+              "opId": "00000000-0000-4000-8000-00000000000a",
+              "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+              "change": "set",
+              "recordKind": "stateChange",
+              "recordId": "0000000e-1111-4111-8111-111111111111",
+              "field": "eventId",
+              "value": "0000000d-1111-4111-8111-111111111111"
+            }
+          ],
+          "next": 10
+        }
+      }
+    }
+  ]
+}

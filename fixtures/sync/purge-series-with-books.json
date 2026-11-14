@@ -1,0 +1,183 @@
+{
+  "description": "A series cannot be purged while a book is still in it. After the book is purged, the series can be.",
+  "epoch": "11111111-1111-4111-8111-111111111111",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000001",
+              "op": "create",
+              "recordKind": "library",
+              "recordId": "00000001-1111-4111-8111-111111111111",
+              "value": {
+                "id": "00000001-1111-4111-8111-111111111111",
+                "title": "Fixture library",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000002",
+              "op": "create",
+              "recordKind": "series",
+              "recordId": "00000009-1111-4111-8111-111111111111",
+              "value": {
+                "id": "00000009-1111-4111-8111-111111111111",
+                "title": "Fixture series",
+                "orderKey": "m",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000003",
+              "op": "create",
+              "recordKind": "book",
+              "recordId": "00000003-1111-4111-8111-111111111111",
+              "value": {
+                "id": "00000003-1111-4111-8111-111111111111",
+                "title": "Fixture book",
+                "orderKey": "m",
+                "seriesId": "00000009-1111-4111-8111-111111111111",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 3,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000001",
+              "status": "applied",
+              "seq": 1
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000002",
+              "status": "applied",
+              "seq": 2
+            },
+            {
+              "opId": "00000000-0000-4000-8000-000000000003",
+              "status": "applied",
+              "seq": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000004",
+              "op": "purge",
+              "recordKind": "series",
+              "recordId": "00000009-1111-4111-8111-111111111111",
+              "baseSeq": 3
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 3,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000004",
+              "status": "rejected",
+              "code": "INTEGRITY_VIOLATION",
+              "message": "The series still has books; move them out or delete them permanently first."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000005",
+              "op": "purge",
+              "recordKind": "book",
+              "recordId": "00000003-1111-4111-8111-111111111111",
+              "baseSeq": 3
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 4,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000005",
+              "status": "applied",
+              "seq": 4,
+              "overridesRemoved": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000006",
+              "op": "purge",
+              "recordKind": "series",
+              "recordId": "00000009-1111-4111-8111-111111111111",
+              "baseSeq": 4
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 5,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000006",
+              "status": "applied",
+              "seq": 5,
+              "overridesRemoved": 0
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

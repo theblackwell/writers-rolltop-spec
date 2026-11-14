@@ -17,6 +17,7 @@
   "invalid/record-override-outside-scope.rolltop": "INTEGRITY_VIOLATION",
   "invalid/record-override-unknown-key.rolltop": "SCHEMA_VIOLATION",
   "invalid/scene-at-root.rolltop": "INTEGRITY_VIOLATION",
+  "invalid/series-without-universe-holds-universe-book.rolltop": "INTEGRITY_VIOLATION",
   "invalid/unsupported-version.rolltop": "ARCHIVE_UNSUPPORTED_VERSION",
   "malicious/absolute-path.rolltop": "ARCHIVE_PATH_TRAVERSAL",
   "malicious/backslash-traversal.rolltop": "ARCHIVE_PATH_TRAVERSAL",
