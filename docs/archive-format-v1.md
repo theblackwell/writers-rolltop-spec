@@ -196,6 +196,7 @@ Records have no state changes, so a record's As-of view in book B is simply its 
 - IDs are globally unique across all record types in an archive. The exception is attachments, which are keyed by hash.
 - Every reference resolves, including to tombstoned records. Records with `deletedAt` are trash and are exported so they can be restored.
 - References from live records to tombstoned ones are **warnings**, not errors.
+- A universe or series cannot be trashed (`deletedAt` set) while any live shared record in its scope exists: a fact, entry, question or event whose `scope` is that universe or series and that is not itself trashed. Trash those records first. A record scoped to a book (inside it or not) never blocks. Only the record's own `deletedAt` matters: a live record whose book is trashed still counts. Restoring the universe or series is always allowed, and restoring the universe or series is always allowed. A writer (a sync `tombstone`, an editor) refuses the change with `INTEGRITY_VIOLATION` (a rule violation; no new code). This is a rule about the act of trashing, not about archive contents: a reader does not reject an archive that holds a trashed universe or series with live shared records in its scope (trash is exported so it can be restored, see above), and need not warn.
 
 ## Forward compatibility
 
