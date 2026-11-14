@@ -456,6 +456,31 @@
         "createdAt",
         "updatedAt"
       ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "scene",
+                  "frontMatter",
+                  "backMatter"
+                ]
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "targetWordCount"
+              ]
+            }
+          }
+        }
+      ],
       "properties": {
         "id": {
           "$ref": "#/$defs/uuid"

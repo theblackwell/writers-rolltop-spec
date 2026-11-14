@@ -74,6 +74,17 @@ function validate(schema, value, rootSchema, path, errors) {
     }).length;
     if (passing !== 1) errors.push(`${path}: matched ${passing} oneOf branches, expected 1`);
   }
+  for (const s of schema.allOf ?? []) validate(s, value, rootSchema, path, errors);
+  if (schema.if) {
+    const e = [];
+    validate(schema.if, value, rootSchema, path, e);
+    if (e.length === 0 && schema.then) validate(schema.then, value, rootSchema, path, errors);
+  }
+  if (schema.not) {
+    const e = [];
+    validate(schema.not, value, rootSchema, path, e);
+    if (e.length === 0) errors.push(`${path}: matches a schema it must not match`);
+  }
 }
 
 const check = (schema, value, rootSchema) => {

@@ -259,6 +259,12 @@ def main(sample):
     write(inv / "goal-over-limit.rolltop", recompute(edit_json(base, "library.json", goal_too_big)))
     expected["invalid/goal-over-limit.rolltop"] = "SCHEMA_VIOLATION"
 
+    # A word target belongs to a part or chapter only (archive-format-v1.md).
+    def goal_on_scene(v):
+        next(n for n in v["manuscriptNodes"] if n["kind"] == "scene")["targetWordCount"] = 1000
+    write(inv / "goal-on-scene.rolltop", recompute(edit_json(base, "library.json", goal_on_scene)))
+    expected["invalid/goal-on-scene.rolltop"] = "SCHEMA_VIOLATION"
+
     (ROOT / "expected.json").write_bytes(dumps(dict(sorted(expected.items()))))
     print(f"wrote {len(expected)} archive fixtures to {ROOT}")
 
