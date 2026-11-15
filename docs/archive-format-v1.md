@@ -174,7 +174,7 @@ A fact, question or timeline event may carry `overrides`: book-specific versions
 - Each item is closed (no unknown keys) and has at least one key besides `bookId`. Otherwise `SCHEMA_VIOLATION`.
 - `bookId` names a book, which may be in the trash, as for entries. Otherwise `REFERENCE_UNRESOLVED`. Each `bookId` appears at most once in the array; a repeat is `INTEGRITY_VIOLATION`.
 - A book-scoped record cannot have overrides. Otherwise the override's book must be inside the record's scope, as for entries (see the `overrides` rule under entries). Breach: `INTEGRITY_VIOLATION`.
-- An override replaces a value. It cannot remove one, because the format has no `null`. For `summary` and `decision`, an empty string means "blank in this book".
+- An override replaces a value. It cannot remove one, because the format has no `null`. For `summary` and `decision`, an empty string means "blank in this book". For an event's `participants`, an empty list means "nobody in this book".
 - Shared fields stay shared: `id`, `scope`, `orderKey`, timestamps, links (`nodeId`, `entryIds`, `knowledge`, `sceneIds`, `entryId`) and `dismissedWarnings`. `dismissedWarnings` stays shared: dismissing a warning on a shared record hides it in every book.
 
 **Effective version.** A record's version for book B is the record with each key present in B's override replacing the top-level value. Other books never see it, and a book's override does not pass to later books.
@@ -190,6 +190,8 @@ Records have no state changes, so a record's As-of view in book B is simply its 
 **Warnings per book.** Continuity warnings and As-of views are worked out per book from the effective record. For book B, each record in B's scope is read as B sees it (its effective version, including its `when` for chronology), and the warnings above are computed from those versions and from B's reading order. A warning appears in each book where its condition holds.
 
 **Compatibility.** These are optional properties on top-level records, so `formatVersion` stays 1 and no version bump is made: additive optional fields need none ([compatibility policy](compatibility-policy.md), rule 2), and the format is still in its draft period. Readers that do not know the property preserve it on round trip.
+
+**Draft-period change (2026-11-15).** An event override's `participants` may now be an empty list (it had `minItems: 1`). This loosens a rule, so it is not additive; it is made inside the draft period of version 1, as the earlier draft-period changes were. `overrides` itself still has `minItems: 1`, and each item still needs a key besides `bookId`.
 
 ## Integrity rules
 

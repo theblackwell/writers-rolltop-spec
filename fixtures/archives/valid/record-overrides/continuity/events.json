@@ -19,6 +19,10 @@
           "label": "Year 1",
           "ordinal": 1
         }
+      },
+      {
+        "bookId": "40000002-0000-4000-8000-000000000002",
+        "participants": []
       }
     ],
     "participants": [

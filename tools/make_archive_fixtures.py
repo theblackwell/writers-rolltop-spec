@@ -96,7 +96,8 @@ def record_overrides(base):
     files = edit_json(files, "continuity/events.json", lambda es: set_record_field(es, UNIVERSE_EVENT, "overrides", [
         {"bookId": FIRST_BOOK, "title": "The founding, as told in the first book", "summary": "",
          "when": {"label": "Year 1", "calendar": "Lantern Reckoning", "ordinal": 1},
-         "participants": [{"entryId": ARCHIVISTS, "role": "keepers"}]}]))
+         "participants": [{"entryId": ARCHIVISTS, "role": "keepers"}]},
+        {"bookId": SALT_BOOK, "participants": []}]))
     return recompute(files)
 
 

@@ -278,8 +278,20 @@
         "opId": { "$ref": "#/$defs/uuid" },
         "status": { "const": "rejected" },
         "code": { "$ref": "#/$defs/rejectCode" },
-        "message": { "$ref": "#/$defs/message" }
-      }
+        "message": { "$ref": "#/$defs/message" },
+        "blockers": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "id"],
+            "properties": { "kind": { "type": "string", "minLength": 1 }, "id": { "$ref": "#/$defs/uuid" } }
+          }
+        },
+        "blockerCount": { "type": "integer", "minimum": 1 }
+      },
+      "dependentRequired": { "blockers": ["blockerCount"], "blockerCount": ["blockers"] }
     },
     "opResult": {
       "oneOf": [
