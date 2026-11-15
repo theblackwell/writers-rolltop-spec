@@ -1,5 +1,5 @@
 {
-  "description": "A trashed record refuses an ordinary edit, but an op that only removes a link (here an unset of a fact's nodeId) is applied in place: the fact stays in the trash and the feed has no restore change.",
+  "description": "A trashed record refuses an ordinary edit, but an op that only removes a link (here an unset of a fact's nodeId) is applied in place: the fact stays in the trash and the feed has no restore change. Cross-device: when another device trashed the record after the op's baseSeq, the unlink-only op is still applied in place (no restore change, no tombstone conflict) and the record stays in the trash.",
   "epoch": "11111111-1111-4111-8111-111111111111",
   "steps": [
     {
@@ -239,6 +239,155 @@
             }
           ],
           "next": 6
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000008",
+              "op": "create",
+              "recordKind": "fact",
+              "recordId": "00000008-1111-4111-8111-111111111111",
+              "value": {
+                "id": "00000008-1111-4111-8111-111111111111",
+                "scope": {
+                  "kind": "book",
+                  "id": "00000003-1111-4111-8111-111111111111"
+                },
+                "text": "Another fact",
+                "truth": "true",
+                "nodeId": "00000004-1111-4111-8111-111111111111",
+                "entryIds": [],
+                "knowledge": [],
+                "orderKey": "n",
+                "createdAt": "2026-11-11T12:00:00Z",
+                "updatedAt": "2026-11-11T12:00:00Z"
+              }
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 7,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000008",
+              "status": "applied",
+              "seq": 7
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000009",
+              "op": "tombstone",
+              "recordKind": "fact",
+              "recordId": "00000008-1111-4111-8111-111111111111",
+              "baseSeq": 7
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 8,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000009",
+              "status": "applied",
+              "seq": 8
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/sync/v1/push",
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "ops": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000010",
+              "op": "unset",
+              "recordKind": "fact",
+              "recordId": "00000008-1111-4111-8111-111111111111",
+              "field": "nodeId",
+              "baseSeq": 7
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 9,
+          "results": [
+            {
+              "opId": "00000000-0000-4000-8000-000000000010",
+              "status": "applied",
+              "seq": 9
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/sync/v1/changes?epoch=11111111-1111-4111-8111-111111111111&after=7&limit=1000"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "epoch": "11111111-1111-4111-8111-111111111111",
+          "head": 9,
+          "changes": [
+            {
+              "seq": 8,
+              "at": "2026-11-11T12:00:00Z",
+              "opId": "00000000-0000-4000-8000-000000000009",
+              "deviceId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+              "change": "tombstone",
+              "recordKind": "fact",
+              "recordId": "00000008-1111-4111-8111-111111111111"
+            },
+            {
+              "seq": 9,
+              "at": "2026-11-11T12:00:00Z",
+              "opId": "00000000-0000-4000-8000-000000000010",
+              "deviceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+              "change": "unset",
+              "recordKind": "fact",
+              "recordId": "00000008-1111-4111-8111-111111111111",
+              "field": "nodeId"
+            }
+          ],
+          "next": 9
         }
       }
     }

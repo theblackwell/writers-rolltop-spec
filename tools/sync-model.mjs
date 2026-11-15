@@ -310,10 +310,11 @@ function applyField(lib, deviceId, op) {
   const foreign = lib.changes.filter((c) => c.recordId === op.recordId && c.deviceId !== deviceId && c.seq > op.baseSeq);
   let restoreBranch = null;
   if (rec.tombstone) {
-    if (rec.tombstone.seq > op.baseSeq && rec.tombstone.deviceId !== deviceId) restoreBranch = rec.tombstone;
-    // An op that only removes links is applied in place: the record stays in the trash, with no restore change and no
-    // tombstone conflict (the field-conflict check below still applies).
-    else if (!isUnlinkOnly(op.recordKind, op.field, op.op, currentValue(lib, op.recordId), op.value)) return reject("RECORD_DELETED");
+    // An op that only removes links is applied in place, whoever trashed the record and whenever: the record stays in the
+    // trash, with no restore change and no tombstone conflict (the field-conflict check below still applies).
+    if (isUnlinkOnly(op.recordKind, op.field, op.op, currentValue(lib, op.recordId), op.value)) { /* in place */ }
+    else if (rec.tombstone.seq > op.baseSeq && rec.tombstone.deviceId !== deviceId) restoreBranch = rec.tombstone;
+    else return reject("RECORD_DELETED");
   }
   const clash = foreign.filter((c) => (c.change === "set" || c.change === "unset") && c.field === op.field);
   if (clash.length) {
